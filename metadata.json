@@ -1,0 +1,7 @@
+{
+  "name": "Spookify AI - The Void",
+  "description": "Spookify AI transforms your photos into cinematic horrors via 'The Void.' An immersive experience blending glitch aesthetics, minigames, and high-end neural styling to forge your nightmare.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
