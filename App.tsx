@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { COSTUME_STYLES } from './constants';
+import { COSTUME_STYLES, CATEGORY_ICONS } from './constants';
 import { CostumeStyle, AppState } from './types';
 import { generateSpookyImage } from './services/geminiService';
 import { SpookyButton } from './components/SpookyButton';
@@ -312,7 +312,7 @@ const App: React.FC = () => {
           {/* Center: Large Icon */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
-              <img src="/Icons/Category Card Image/l Nightmares (Category I).svg" alt="Original Nightmares" className="w-full h-full object-contain" />
+              <img src={CATEGORY_ICONS.nightmares} alt="Original Nightmares" className="w-full h-full object-contain" />
               
               {/* Corner Brackets - Only visible on hover */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -344,7 +344,7 @@ const App: React.FC = () => {
           {/* Center: Large Icon */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
-              <img src="/Icons/Category Card Image/Supernatural (Category II).svg" alt="Supernatural" className="w-full h-full object-contain" />
+              <img src={CATEGORY_ICONS.supernatural} alt="Supernatural" className="w-full h-full object-contain" />
               
               {/* Corner Brackets - Only visible on hover */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -376,7 +376,7 @@ const App: React.FC = () => {
           {/* Center: Large Icon */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
-              <img src="/Icons/Category Card Image/Video Game Legends (Category III).svg" alt="Video Game Legends" className="w-full h-full object-contain" />
+              <img src={CATEGORY_ICONS.game} alt="Video Game Legends" className="w-full h-full object-contain" />
               
               {/* Corner Brackets - Only visible on hover */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -408,7 +408,7 @@ const App: React.FC = () => {
           {/* Center: Large Icon */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
-              <img src="/Icons/Category Card Image/Movie Maniacs (Category IV).svg" alt="Movie Maniacs" className="w-full h-full object-contain" />
+              <img src={CATEGORY_ICONS.movie} alt="Movie Maniacs" className="w-full h-full object-contain" />
               
               {/* Corner Brackets - Only visible on hover */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -675,7 +675,7 @@ const App: React.FC = () => {
           onTouchStart={handleSliderDrag}
         >
            {/* Background: Generated (The Reveal) */}
-           <img src={generatedImage || ''} alt="Result" className="absolute inset-0 w-full h-full object-cover" />
+           {generatedImage && <img src={generatedImage} alt="Result" className="absolute inset-0 w-full h-full object-cover" />}
            
            {/* FULLSCREEN ZOOM BUTTON */}
            <button 
@@ -696,12 +696,12 @@ const App: React.FC = () => {
               className="absolute top-0 left-0 h-full overflow-hidden bg-black border-r border-white/50"
               style={{ width: `${sliderPosition}%` }}
            >
-               <img 
-                  src={originalImage || ''} 
+               {originalImage && <img 
+                  src={originalImage} 
                   alt="Original" 
                   className="absolute top-0 left-0 max-w-none h-full object-cover filter grayscale contrast-125 brightness-75"
                   style={{ width: sliderRef.current?.offsetWidth }}
-               />
+               />}
                
                {/* Digital Grid Overlay on Original Only */}
                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
@@ -775,8 +775,8 @@ const App: React.FC = () => {
         onDoubleClick={resetZoomAndPan}
         style={{ cursor: isPanning ? 'grabbing' : zoom > 1 ? 'grab' : 'default' }}
       >
-        <img 
-          src={generatedImage || ''} 
+        {generatedImage && <img 
+          src={generatedImage} 
           alt="Full Screen Result" 
           className="max-w-[90vw] max-h-[90vh] object-contain shadow-[0_0_50px_rgba(0,0,0,1)] rounded-sm border border-white/10 select-none"
           style={{ 
@@ -784,7 +784,7 @@ const App: React.FC = () => {
             transition: isPanning ? 'none' : 'transform 0.1s ease-out',
           }}
           onMouseDown={handlePanStart}
-        />
+        />}
       </div>
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[61] flex items-center gap-6 bg-black/50 backdrop-blur-md border border-white/10 px-4 py-2 rounded-lg font-tech text-xs select-none">

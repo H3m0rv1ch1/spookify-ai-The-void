@@ -3,7 +3,7 @@ export interface CostumeStyle {
   name: string;
   description: string;
   promptModifier: string;
-  icon: string; // Emoji or SVG path
+  icon: string; // SVG URL (bundled by Vite for instant loading)
   hexColor: string; // For dynamic lighting
   accentColorClass: string; // Tailwind class
   gender: 'male' | 'female' | 'unisex';

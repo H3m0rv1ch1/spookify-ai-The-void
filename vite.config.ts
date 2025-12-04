@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      assetsInlineLimit: 0, // Don't inline assets, but bundle them for fast loading
     };
 });
