@@ -299,65 +299,129 @@ const App: React.FC = () => {
         {/* Original Nightmares Card */}
         <div 
           onClick={() => setSelectionCategory('original')}
-          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-end cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
+          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-between cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
           style={{ backgroundImage: 'radial-gradient(circle at 100% 100%, rgba(255,42,42,0.1), transparent 40%)' }}
         >
           <div className="absolute inset-0 bg-grid opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-300"></div>
+          
+          {/* Top: Category Label */}
           <div className="relative z-10">
             <span className="font-tech text-xs text-ash/40 tracking-[0.3em] uppercase group-hover:text-neon-red transition-colors">Category I</span>
-            <h3 className="font-display font-bold text-3xl md:text-4xl text-white my-2">Original Nightmares</h3>
-            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Classic ghouls and timeless horrors born from folklore and shadow.</p>
           </div>
-          <div className="absolute top-6 right-6 text-6xl opacity-10 group-hover:opacity-50 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 ease-out">
-          💀
+          
+          {/* Center: Large Icon */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
+              <img src="/Icons/Category Card Image/l Nightmares (Category I).svg" alt="Original Nightmares" className="w-full h-full object-contain" />
+              
+              {/* Corner Brackets - Only visible on hover */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+          </div>
+          
+          {/* Bottom: Title & Description */}
+          <div className="relative z-10">
+            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-2">Original Nightmares</h3>
+            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Classic horrors from folklore and shadow.</p>
           </div>
         </div>
         {/* Supernatural Card */}
         <div 
           onClick={() => setSelectionCategory('supernatural')}
-          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-end cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
+          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-between cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
            style={{ backgroundImage: 'radial-gradient(circle at 100% 100%, rgba(255,42,42,0.1), transparent 40%)' }}
         >
           <div className="absolute inset-0 bg-grid opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-300"></div>
+          
+          {/* Top: Category Label */}
           <div className="relative z-10">
             <span className="font-tech text-xs text-ash/40 tracking-[0.3em] uppercase group-hover:text-neon-red transition-colors">Category II</span>
-            <h3 className="font-display font-bold text-3xl md:text-4xl text-white my-2">Supernatural</h3>
-            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Join the hunt with characters from the iconic TV series.</p>
           </div>
-           <div className="absolute top-6 right-6 text-6xl opacity-10 group-hover:opacity-50 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out">
-           🔪
+          
+          {/* Center: Large Icon */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
+              <img src="/Icons/Category Card Image/Supernatural (Category II).svg" alt="Supernatural" className="w-full h-full object-contain" />
+              
+              {/* Corner Brackets - Only visible on hover */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+          </div>
+          
+          {/* Bottom: Title & Description */}
+          <div className="relative z-10">
+            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-2">Supernatural</h3>
+            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Characters from the iconic TV series.</p>
           </div>
         </div>
         {/* Video Game Legends Card */}
         <div 
           onClick={() => setSelectionCategory('game')}
-          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-end cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
+          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-between cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
            style={{ backgroundImage: 'radial-gradient(circle at 100% 100%, rgba(255,42,42,0.1), transparent 40%)' }}
         >
           <div className="absolute inset-0 bg-grid opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-300"></div>
+          
+          {/* Top: Category Label */}
           <div className="relative z-10">
             <span className="font-tech text-xs text-ash/40 tracking-[0.3em] uppercase group-hover:text-neon-red transition-colors">Category III</span>
-            <h3 className="font-display font-bold text-3xl md:text-4xl text-white my-2">Video Game Legends</h3>
-            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Embody iconic heroes and villains from digital realms.</p>
           </div>
-           <div className="absolute top-6 right-6 text-6xl opacity-10 group-hover:opacity-50 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out">
-           🎮
+          
+          {/* Center: Large Icon */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
+              <img src="/Icons/Category Card Image/Video Game Legends (Category III).svg" alt="Video Game Legends" className="w-full h-full object-contain" />
+              
+              {/* Corner Brackets - Only visible on hover */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+          </div>
+          
+          {/* Bottom: Title & Description */}
+          <div className="relative z-10">
+            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-2 whitespace-nowrap">Game Legends</h3>
+            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Iconic heroes and villains from games.</p>
           </div>
         </div>
         {/* Movie Maniacs Card */}
         <div 
           onClick={() => setSelectionCategory('movie')}
-          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-end cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
+          className="group relative h-[450px] bg-black border border-white/10 p-8 flex flex-col justify-between cursor-pointer overflow-hidden hover:border-neon-red transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,42,42,0.2)]"
            style={{ backgroundImage: 'radial-gradient(circle at 100% 100%, rgba(255,42,42,0.1), transparent 40%)' }}
         >
           <div className="absolute inset-0 bg-grid opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-300"></div>
+          
+          {/* Top: Category Label */}
           <div className="relative z-10">
             <span className="font-tech text-xs text-ash/40 tracking-[0.3em] uppercase group-hover:text-neon-red transition-colors">Category IV</span>
-            <h3 className="font-display font-bold text-3xl md:text-4xl text-white my-2">Movie Maniacs</h3>
-            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Become legendary villains and heroes from the silver screen.</p>
           </div>
-           <div className="absolute top-6 right-6 text-6xl opacity-10 group-hover:opacity-50 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 ease-out">
-           🎬
+          
+          {/* Center: Large Icon */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500 ease-out">
+              <img src="/Icons/Category Card Image/Movie Maniacs (Category IV).svg" alt="Movie Maniacs" className="w-full h-full object-contain" />
+              
+              {/* Corner Brackets - Only visible on hover */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+          </div>
+          
+          {/* Bottom: Title & Description */}
+          <div className="relative z-10">
+            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-2">Movie Maniacs</h3>
+            <p className="font-tech text-sm text-ash/60 leading-relaxed max-w-sm">Legendary villains and heroes from film.</p>
           </div>
         </div>
       </div>
@@ -388,7 +452,7 @@ const App: React.FC = () => {
           <div className="font-tech text-neon-red text-xl font-bold mt-4 md:mt-0 flex gap-2">
               <span>01</span>
               <span className="opacity-30">/</span>
-              <span>03</span>
+              <span>{String(stylesToShow.length).padStart(2, '0')}</span>
           </div>
         </header>
   
@@ -403,9 +467,15 @@ const App: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-neon-red/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               
               <div className="relative z-10 flex justify-between items-start">
-                 {/* Updated: Smaller Icon Size */}
-                 <div className="text-4xl md:text-5xl mb-4 grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                    {style.icon}
+                 {/* SVG Icon with Corner Brackets */}
+                 <div className="relative w-24 h-24 md:w-32 md:h-32 mb-4 grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] flex items-center justify-center">
+                    <img src={style.icon} alt={style.name} className="w-full h-full object-contain" />
+                    
+                    {/* Corner Brackets - Only visible on hover */}
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-neon-red opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                  </div>
                  
                  <div className="flex flex-col items-end gap-2">
