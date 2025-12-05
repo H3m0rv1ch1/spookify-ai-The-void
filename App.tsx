@@ -179,8 +179,11 @@ const App: React.FC = () => {
     }
 
     // --- CREDIT CHECK ---
-    // User must have at least 1 credit to generate an image
-    if (credits <= 0) {
+    // Check if user is a judge (unlimited credits)
+    const isJudge = localStorage.getItem('spookify_isJudge') === 'true';
+    
+    // User must have at least 1 credit to generate an image (unless they're a judge)
+    if (!isJudge && credits <= 0) {
       setError("INSUFFICIENT CREDITS. COMPLETE MINIGAMES TO EARN CREDITS.");
       return;
     }
@@ -190,8 +193,10 @@ const App: React.FC = () => {
     try {
       const result = await generateSpookyImage(originalImage, selectedStyle.promptModifier);
       setGeneratedImage(result);
-      // Deduct 1 credit after successful generation
-      setCredits(prev => prev - 1);
+      // Deduct 1 credit after successful generation (unless they're a judge)
+      if (!isJudge) {
+        setCredits(prev => prev - 1);
+      }
       setAppState(AppState.RESULT);
     } catch (err: any) {
       console.error(err);
@@ -888,11 +893,16 @@ const App: React.FC = () => {
               SPOOKIFY<span className="text-neon-red">.AI</span>
           </div>
           
-          {/* Credits Display - Only show if user has credits */}
-          {credits > 0 && (
+          {/* Credits Display - Only show if user has credits or is a judge */}
+          {(credits > 0 || localStorage.getItem('spookify_isJudge') === 'true') && (
             <div className="font-tech text-xs uppercase tracking-wider flex items-center gap-2 px-3 py-1.5 bg-neon-red/10 border border-neon-red/30 rounded pointer-events-auto backdrop-blur-sm">
               <span className="text-ash/60">CREDITS:</span>
-              <span className="text-neon-red font-bold">{credits}</span>
+              <span className="text-neon-red font-bold">
+                {localStorage.getItem('spookify_isJudge') === 'true' ? '∞ UNLIMITED' : credits}
+              </span>
+              {localStorage.getItem('spookify_isJudge') === 'true' && (
+                <span className="text-green-500 text-[10px]">JUDGE</span>
+              )}
             </div>
           )}
         </nav>

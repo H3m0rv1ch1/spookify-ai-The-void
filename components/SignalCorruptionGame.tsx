@@ -11,7 +11,7 @@ interface SignalCorruptionGameProps {
   onCreditsChange: (credits: number) => void;
 }
 
-type GamePhase = 'INTRO' | 'WAVEFORM' | 'GLYPH' | 'PURGE' | 'VICTORY' | 'FAILURE' | 'PHASE1_COMPLETE' | 'PHASE2_COMPLETE' | 'PHASE3_COMPLETE';
+type GamePhase = 'INTRO' | 'WAVEFORM' | 'GLYPH' | 'PURGE' | 'VICTORY' | 'FAILURE' | 'PHASE1_COMPLETE' | 'PHASE2_COMPLETE' | 'PHASE3_COMPLETE' | 'JUDGE_VERIFICATION';
 
 // --- Helper Functions ---
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -113,7 +113,17 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
           handlePhaseComplete('PHASE3_COMPLETE');
         }} scannerActive={selectedTools.has('scanner')} radioActive={selectedTools.has('decoder')} />;
       case 'PHASE3_COMPLETE':
-        return <Phase3CompleteScreen onContinue={() => setPhase('VICTORY')} />;
+        return <Phase3CompleteScreen onContinue={() => setPhase('JUDGE_VERIFICATION')} />;
+      case 'JUDGE_VERIFICATION':
+        return <JudgeVerificationScreen onComplete={(isJudge, accessKey) => {
+          if (isJudge && accessKey) {
+            // Store judge status and unlimited credits
+            localStorage.setItem('spookify_isJudge', 'true');
+            localStorage.setItem('spookify_judgeKey', accessKey);
+            onCreditsChange(999999); // Unlimited credits
+          }
+          setPhase('VICTORY');
+        }} />;
       case 'VICTORY':
         return <VictoryScreen onRestart={handleRestart} onExit={() => onExit(earnedCredits)} onVictory={onVictory} />;
       case 'FAILURE':
@@ -171,8 +181,13 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
           {(phase !== 'INTRO' && phase !== 'GLYPH') && (
             <div className="font-tech text-xs uppercase tracking-wider flex items-center gap-2 px-3 py-1.5 bg-neon-red/10 border border-neon-red/30 rounded animate-fade-in">
               <span className="text-ash/60">CREDITS:</span>
-              <span className="text-neon-red font-bold">{credits + earnedCredits}</span>
-              {earnedCredits > 0 && <span className="text-green-500 text-[10px]">(+{earnedCredits})</span>}
+              <span className="text-neon-red font-bold">
+                {localStorage.getItem('spookify_isJudge') === 'true' ? '∞ UNLIMITED' : (credits + earnedCredits)}
+              </span>
+              {earnedCredits > 0 && !localStorage.getItem('spookify_isJudge') && <span className="text-green-500 text-[10px]">(+{earnedCredits})</span>}
+              {localStorage.getItem('spookify_isJudge') === 'true' && (
+                <span className="text-green-500 text-[10px]">JUDGE</span>
+              )}
             </div>
           )}
           
@@ -972,6 +987,278 @@ const IntroScreen: React.FC<{ text: string; onStart: () => void }> = ({ text, on
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const JudgeVerificationScreen: React.FC<{ onComplete: (isJudge: boolean, accessKey?: string) => void }> = ({ onComplete }) => {
+  const [step, setStep] = React.useState<'question' | 'voice' | 'key'>('question');
+  const [mentorText, setMentorText] = React.useState('');
+  const [isListening, setIsListening] = React.useState(false);
+  const [voiceVerified, setVoiceVerified] = React.useState(false);
+  const [accessKey, setAccessKey] = React.useState('');
+  const [showButton, setShowButton] = React.useState(false);
+  const recognitionRef = React.useRef<any>(null);
+  
+  const questionText = "Before we proceed, I must ask: Are you a judge for this hackathon? This verification is required for special access privileges.";
+  const voiceText = "Excellent. For security verification, please use your microphone and say the following phrase clearly: I'm gonna make you win this hackathon.";
+  const keyText = "Voice verification successful! You have been granted unlimited transformation credits. Please enter your judge access key to complete the verification process.";
+  
+  React.useEffect(() => {
+    // Typewriter effect for mentor text
+    const textToShow = step === 'question' ? questionText : step === 'voice' ? voiceText : keyText;
+    
+    let i = 0;
+    const interval = setInterval(() => {
+      setMentorText(textToShow.slice(0, i + 1));
+      i++;
+      if (i >= textToShow.length) {
+        clearInterval(interval);
+        setTimeout(() => setShowButton(true), 500);
+      }
+    }, 30);
+    
+    // Mentor speaks
+    const speak = (textToSpeak: string) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        const doSpeak = () => {
+          const utterance = new SpeechSynthesisUtterance(textToSpeak.toLowerCase());
+          utterance.pitch = 0.1; 
+          utterance.rate = 0.8;
+          utterance.volume = 1;
+          
+          const voices = window.speechSynthesis.getVoices();
+          const robotVoice = voices.find(v => 
+            v.name.toLowerCase().includes('male') || 
+            v.name.toLowerCase().includes('david') ||
+            v.name.toLowerCase().includes('google us english')
+          ) || voices[0];
+          
+          if (robotVoice) utterance.voice = robotVoice;
+          
+          window.speechSynthesis.speak(utterance);
+        };
+        
+        if (window.speechSynthesis.getVoices().length > 0) {
+          doSpeak();
+        } else {
+          window.speechSynthesis.onvoiceschanged = () => {
+            doSpeak();
+          };
+        }
+      }
+    };
+    
+    const speechTimer = setTimeout(() => speak(textToShow), 500);
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(speechTimer);
+      window.speechSynthesis.cancel();
+    };
+  }, [step]);
+  
+  const handleNo = () => {
+    onComplete(false);
+  };
+  
+  const handleYes = () => {
+    setShowButton(false);
+    setStep('voice');
+  };
+  
+  const startVoiceRecognition = () => {
+    // Check if browser supports speech recognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
+      console.log('Heard:', transcript);
+      
+      // Very flexible phrase matching - check for key words
+      const hasGonna = transcript.includes("gonna") || transcript.includes("going to");
+      const hasMake = transcript.includes("make");
+      const hasWin = transcript.includes("win");
+      const hasHackathon = transcript.includes("hackathon") || transcript.includes("hack-a-thon");
+      
+      // Accept if it has most of the key words (at least 3 out of 4)
+      const keywordCount = [hasGonna, hasMake, hasWin, hasHackathon].filter(Boolean).length;
+      
+      if (keywordCount >= 3 || 
+          transcript.includes("make you win") || 
+          transcript.includes("win this hackathon") ||
+          transcript.includes("gonna make you win")) {
+        setVoiceVerified(true);
+        setIsListening(false);
+        setTimeout(() => {
+          setShowButton(false);
+          setStep('key');
+        }, 1500);
+      } else {
+        setIsListening(false);
+        alert('Phrase not recognized. Please try again and speak clearly: "I\'m gonna make you win this hackathon"');
+      }
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      alert('Error with speech recognition. Please try again.');
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+  
+  const handleKeySubmit = () => {
+    if (!accessKey.trim()) {
+      alert('Please enter your access key.');
+      return;
+    }
+    
+    // Validate the specific judge access key
+    const validKey = "YOU WIN THIS HACKATHON";
+    if (accessKey.toUpperCase().trim() !== validKey) {
+      alert('Invalid access key. Please enter the correct judge access key.');
+      return;
+    }
+    
+    onComplete(true, accessKey);
+  };
+  
+  return (
+    <div className="relative h-full flex flex-col items-center justify-center p-6 gap-8">
+      <div className="max-w-3xl w-full">
+        {/* Mentor Box */}
+        <div className="relative animate-fade-in">
+          <div className="absolute -top-1 -left-1 w-4 h-4 border-t border-l border-neon-red"></div>
+          <div className="absolute -top-1 -right-1 w-4 h-4 border-t border-r border-neon-red"></div>
+          <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b border-l border-neon-red"></div>
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b border-r border-neon-red"></div>
+          
+          <div className="relative bg-black/90 border border-neon-red/40 backdrop-blur-xl shadow-[0_0_30px_rgba(255,42,42,0.25)] overflow-hidden p-8">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-red/5 to-transparent animate-scan pointer-events-none"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
+              {/* Mentor Image */}
+              <div className="relative w-32 h-32 flex-shrink-0">
+                <div className="absolute inset-0 border-2 border-neon-red/30 rounded-full animate-spin-slow"></div>
+                <div className="absolute inset-1 border-2 border-white/10 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-28 h-28 bg-neon-red rounded-full blur-2xl animate-pulse opacity-30 absolute"></div>
+                  <div className="w-30 h-30 border-2 border-neon-red rounded-full grid place-items-center bg-black relative overflow-hidden shadow-[0_0_20px_rgba(255,42,42,0.6)] p-3">
+                    <img src={MENTOR_ICON} alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
+                  </div>
+                </div>
+                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white/60"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-white/60"></div>
+              </div>
+              
+              {/* Text */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-red opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-red"></span>
+                  </span>
+                  <p className="font-tech text-neon-red text-sm uppercase tracking-[0.15em] font-bold">THE MENTOR</p>
+                  <span className="font-tech text-white/40 text-xs uppercase tracking-wider ml-auto">
+                    {step === 'question' ? 'VERIFICATION' : step === 'voice' ? 'VOICE AUTH' : 'KEY INPUT'}
+                  </span>
+                </div>
+                
+                <p className="font-tech text-white/90 text-base leading-relaxed">
+                  {mentorText}
+                  <span className="inline-block w-1.5 h-4 bg-neon-red ml-0.5 animate-pulse shadow-[0_0_6px_#ff2a2a]"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Action Buttons */}
+      {showButton && (
+        <div className="animate-fade-in flex gap-4">
+          {step === 'question' && (
+            <>
+              <SpookyButton variant="ghost" onClick={handleNo} className="text-lg px-8 py-4">
+                NO
+              </SpookyButton>
+              <SpookyButton variant="ritual" onClick={handleYes} className="text-lg px-8 py-4">
+                YES
+              </SpookyButton>
+            </>
+          )}
+          
+          {step === 'voice' && (
+            <SpookyButton 
+              variant="ritual" 
+              onClick={startVoiceRecognition} 
+              className="text-lg px-8 py-4"
+              disabled={isListening}
+            >
+              {isListening ? (
+                <span className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                  </span>
+                  LISTENING...
+                </span>
+              ) : voiceVerified ? (
+                '✓ VERIFIED'
+              ) : (
+                '🎤 START VOICE VERIFICATION'
+              )}
+            </SpookyButton>
+          )}
+          
+          {step === 'key' && (
+            <div className="flex flex-col gap-4 w-full max-w-md">
+              <input
+                type="text"
+                value={accessKey}
+                onChange={(e) => setAccessKey(e.target.value)}
+                placeholder="ENTER ACCESS KEY..."
+                className="w-full px-6 py-4 bg-black/50 border border-neon-red/40 text-white font-tech text-sm uppercase tracking-wider focus:border-neon-red focus:outline-none focus:shadow-[0_0_20px_rgba(255,42,42,0.3)] transition-all placeholder:text-ash/30"
+                onKeyPress={(e) => e.key === 'Enter' && handleKeySubmit()}
+              />
+              <SpookyButton variant="ritual" onClick={handleKeySubmit} className="text-lg px-8 py-4 w-full">
+                SUBMIT ACCESS KEY
+              </SpookyButton>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {voiceVerified && step === 'voice' && (
+        <div className="animate-fade-in text-center">
+          <p className="font-tech text-green-500 text-sm uppercase tracking-wider">
+            ✓ Voice verification successful!
+          </p>
+        </div>
+      )}
     </div>
   );
 };
