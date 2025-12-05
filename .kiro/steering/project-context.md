@@ -46,7 +46,7 @@ This is a Halloween costume transformation app with a unique twist: users must c
 
 ## API Integration
 - Users provide their own OpenRouter API key
-- Stored in `.env.local` as `GEMINI_API_KEY` (legacy name, works with OpenRouter)
+- Stored in `.env.local` as `API_KEY`
 - Prompts are engineered for consistent character transformations
 - Error handling for API failures
 

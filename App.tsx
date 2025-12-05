@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { COSTUME_STYLES, CATEGORY_ICONS } from './constants';
 import { CostumeStyle, AppState } from './types';
-import { generateSpookyImage } from './services/geminiService';
+import { generateSpookyImage } from './services/openRouterService';
 import { SpookyButton } from './components/SpookyButton';
 import { GeneratingView } from './components/GeneratingView';
 import { SignalCorruptionGame } from './components/SignalCorruptionGame';

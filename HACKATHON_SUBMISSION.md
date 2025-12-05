@@ -4,7 +4,7 @@
 We wanted to create something that goes beyond a simple AI image generator. Halloween costume apps are everywhere, but they're usually boring and predictable. We asked ourselves: "What if the AI transformation process itself was an experience?" That's when we came up with The Void - a corrupted digital realm where users must fight through glitchy minigames to earn their transformation. We were inspired by cyberpunk aesthetics, horror games, and the idea that AI systems could have a "dark side" that needs to be conquered.
 
 ## What it does
-Spookify AI transforms your photos into cinematic horror characters using Google's Gemini AI. But here's the twist: the first time you try to generate an image, the system gets "corrupted" by a mysterious entity called The Void Echo. To restore the system and unlock transformations, you must complete three intense minigames:
+Spookify AI transforms your photos into cinematic horror characters using AI image generation via OpenRouter. But here's the twist: the first time you try to generate an image, the system gets "corrupted" by a mysterious entity called The Void Echo. To restore the system and unlock transformations, you must complete three intense minigames:
 
 1. **Glyph Phase** - A pattern recognition challenge where you memorize and replicate sequences of corrupted symbols
 2. **Waveform Phase** - A signal calibration puzzle where you match target waveforms by adjusting frequency, amplitude, and phase
@@ -131,7 +131,7 @@ Kiro transformed our development workflow from "writing code" to "designing expe
 
 2. **Waveform Visualization** - Creating a real-time oscilloscope that accurately displays sine waves with adjustable parameters required deep Canvas API knowledge and math.
 
-3. **AI Prompt Engineering** - Getting Gemini to consistently produce high-quality, character-accurate transformations took extensive prompt refinement. We had to balance creativity with consistency.
+3. **AI Prompt Engineering** - Getting the AI to consistently produce high-quality, character-accurate transformations took extensive prompt refinement. We had to balance creativity with consistency.
 
 4. **Performance Optimization** - With all the animations, particle effects, and real-time game logic, we had to carefully optimize to maintain 60fps.
 
@@ -146,7 +146,7 @@ Kiro transformed our development workflow from "writing code" to "designing expe
 - **Comparison Slider** - The before/after slider with fullscreen zoom lets users really appreciate the AI transformations
 
 ## What we learned
-- How to integrate Google Gemini API for image generation and prompt engineering
+- How to integrate OpenRouter API for image generation and prompt engineering
 - Advanced Canvas API techniques for real-time graphics
 - Creating immersive game experiences within a web app
 - Balancing aesthetics with performance in React applications

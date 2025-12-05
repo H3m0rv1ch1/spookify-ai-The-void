@@ -1,11 +1,7 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # Spookify AI - The Void 🎃👻
 
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Spookify AI - The Void" src="./Public/SPOKIFY.AI-git-img .svg" />
 </div>
 
 A Halloween costume transformation app with a cyberpunk twist. Complete intense minigames to defeat "The Void" and unlock AI-powered character transformations.
@@ -45,10 +41,10 @@ A Halloween costume transformation app with a cyberpunk twist. Complete intense 
    
    Create a `.env.local` file in the root directory:
    ```env
-   GEMINI_API_KEY=your_openrouter_api_key_here
+   API_KEY=your_openrouter_api_key_here
    ```
    
-   **Note:** Despite the variable name `GEMINI_API_KEY` (legacy naming), this app uses **OpenRouter API**. Get your API key from [OpenRouter](https://openrouter.ai/).
+   Get your API key from [OpenRouter](https://openrouter.ai/).
 
 4. **Run the app**
    ```bash
@@ -79,7 +75,7 @@ A Halloween costume transformation app with a cyberpunk twist. Complete intense 
 
 ### For Developers
 - The app is designed to work with OpenRouter API
-- Compatible with multiple AI models (GPT-4, Claude, Gemini, etc.)
+- Compatible with multiple AI models for image generation
 - Easy to swap AI providers by changing the API endpoint
 - No API keys are included in this repository
 
