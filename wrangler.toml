@@ -1,0 +1,5 @@
+name = "spookify-ai-the-void"
+compatibility_date = "2024-12-05"
+
+[site]
+bucket = "./dist"

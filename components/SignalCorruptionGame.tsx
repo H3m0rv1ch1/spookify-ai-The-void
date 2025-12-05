@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { SpookyButton } from './SpookyButton';
 import { LEVELS, GLYPHS } from './corruptionConstants';
 import { GlyphPhase, WaveformPhase, PurgePhase } from './minigames';
+import { MENTOR_ICON } from '../constants';
 
 interface SignalCorruptionGameProps {
   onExit: (earnedCredits: number) => void;
@@ -407,7 +408,7 @@ const Phase1CompleteScreen: React.FC<{ onContinue: () => void }> = ({ onContinue
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-28 h-28 bg-neon-red rounded-full blur-2xl animate-pulse opacity-30 absolute"></div>
                   <div className="w-30 h-30 border-2 border-neon-red rounded-full grid place-items-center bg-black relative overflow-hidden shadow-[0_0_20px_rgba(255,42,42,0.6)] p-3">
-                    <img src="/Public/Icons/The Mentor .svg" alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
+                    <img src={MENTOR_ICON} alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
                   </div>
                 </div>
                 <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white/60"></div>
@@ -531,7 +532,7 @@ const Phase2CompleteScreen: React.FC<{ onContinue: () => void }> = ({ onContinue
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-28 h-28 bg-neon-red rounded-full blur-2xl animate-pulse opacity-30 absolute"></div>
                   <div className="w-30 h-30 border-2 border-neon-red rounded-full grid place-items-center bg-black relative overflow-hidden shadow-[0_0_20px_rgba(255,42,42,0.6)] p-3">
-                    <img src="/Public/Icons/The Mentor .svg" alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
+                    <img src={MENTOR_ICON} alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
                   </div>
                 </div>
                 <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white/60"></div>
@@ -655,7 +656,7 @@ const Phase3CompleteScreen: React.FC<{ onContinue: () => void }> = ({ onContinue
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-28 h-28 bg-neon-red rounded-full blur-2xl animate-pulse opacity-30 absolute"></div>
                   <div className="w-30 h-30 border-2 border-neon-red rounded-full grid place-items-center bg-black relative overflow-hidden shadow-[0_0_20px_rgba(255,42,42,0.6)] p-3">
-                    <img src="/Public/Icons/The Mentor .svg" alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
+                    <img src={MENTOR_ICON} alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,42,42,0.8)]" />
                   </div>
                 </div>
                 <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white/60"></div>
@@ -857,7 +858,7 @@ const IntroScreen: React.FC<{ text: string; onStart: () => void }> = ({ text, on
                   
                   {/* Image */}
                   <div className="w-[4.5rem] h-[4.5rem] border border-neon-red rounded-full grid place-items-center bg-black relative overflow-hidden shadow-[0_0_15px_rgba(255,42,42,0.4)] p-2">
-                    <img src="/Public/Icons/The Mentor .svg" alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,42,42,0.6)]" />
+                    <img src={MENTOR_ICON} alt="The Mentor" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,42,42,0.6)]" />
                   </div>
                 </div>
                 
@@ -1015,4 +1016,5 @@ const FailureScreen: React.FC<{ onRetry: () => void; }> = ({ onRetry }) => (
         <SpookyButton variant="ritual" onClick={onRetry}>RE-ESTABLISH CONNECTION</SpookyButton>
     </div>
 );
+
 

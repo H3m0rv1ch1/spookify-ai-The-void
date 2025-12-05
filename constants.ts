@@ -32,12 +32,15 @@ import JokerIcon from './Public/Icons/MOVIE MANIACS/Joker (Agent of Chaos).svg';
 import PredatorIcon from './Public/Icons/MOVIE MANIACS/Predator (The Hunter).svg';
 import MadMaxIcon from './Public/Icons/MOVIE MANIACS/Mad Max (The Road Warrior).svg';
 import CustomIcon from './Public/Icons/custom.svg';
+import MentorIcon from './Public/Icons/The Mentor .svg';
 
 // Category card images
 import NightmaresCardIcon from './Public/Icons/Category Card Image/l Nightmares (Category I).svg';
 import SupernaturalCardIcon from './Public/Icons/Category Card Image/Supernatural (Category II).svg';
 import GameLegendsCardIcon from './Public/Icons/Category Card Image/Video Game Legends (Category III).svg';
 import MovieManiacsCardIcon from './Public/Icons/Category Card Image/Movie Maniacs (Category IV).svg';
+
+export const MENTOR_ICON = MentorIcon;
 
 export const CATEGORY_ICONS = {
   nightmares: NightmaresCardIcon,

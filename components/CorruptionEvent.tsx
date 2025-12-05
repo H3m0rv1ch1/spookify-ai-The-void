@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { SpookyButton } from './SpookyButton';
+import { MENTOR_ICON } from '../constants';
 
 interface CorruptionEventProps {
   onFix: () => void;
@@ -450,7 +451,7 @@ export const CorruptionEvent: React.FC<CorruptionEventProps> = ({ onFix }) => {
                     
                      <div className="w-40 h-40 md:w-40 md:h-40 border border-neon-red rounded-full grid place-items-center bg-black/80 relative overflow-hidden shadow-[0_0_15px_rgba(255,42,42,0.3)] p-1">
                           
-                          <img src="/Public/Icons/The Mentor .svg" alt="The Mentor" className="w-[150%] h-[150%] object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,42,42,0.5)]" />
+                          <img src={MENTOR_ICON} alt="The Mentor" className="w-[150%] h-[150%] object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,42,42,0.5)]" />
                      </div>
                 </div>
             </div>
@@ -487,3 +488,4 @@ export const CorruptionEvent: React.FC<CorruptionEventProps> = ({ onFix }) => {
     </div>
   );
 };
+

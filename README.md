@@ -24,7 +24,7 @@ A Halloween costume transformation app with a cyberpunk twist. Complete intense 
 
 ## 📦 Installation
 
-**Prerequisites:** Node.js 16+
+**Prerequisites:** Node.js 18+
 
 1. **Clone the repository**
    ```bash
@@ -53,8 +53,22 @@ A Halloween costume transformation app with a cyberpunk twist. Complete intense 
 
 5. **Open in browser**
    ```
-   http://localhost:5173
+   http://localhost:3000
    ```
+
+## 🚀 Deployment
+
+Build for production:
+```bash
+npm run build
+```
+
+Preview production build:
+```bash
+npm run preview
+```
+
+For detailed deployment instructions (Cloudflare Pages, GitHub Pages, Vercel), see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## 🎮 How to Play
 
