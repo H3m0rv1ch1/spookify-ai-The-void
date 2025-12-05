@@ -1,0 +1,228 @@
+import React, { useState, useEffect } from 'react';
+import { GLYPHS } from '../corruptionConstants';
+import { HuntedEntity } from './HuntedEntity';
+
+interface GlyphPhaseProps {
+  config: any;
+  onComplete: () => void;
+  onFail: () => void;
+}
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
+export const GlyphPhase: React.FC<GlyphPhaseProps> = ({ config, onComplete, onFail }) => {
+  const [targetSequence, setTargetSequence] = useState<string[]>([]);
+  const [grid, setGrid] = useState<string[]>([]);
+  const [playerSequence, setPlayerSequence] = useState<string[]>([]);
+  const [isShowing, setIsShowing] = useState(true);
+  const [countdown, setCountdown] = useState(0);
+  
+  // Entity hunting states
+  const [entityFound, setEntityFound] = useState(false);
+  const [entityPurged, setEntityPurged] = useState(false);
+  const [hiddenGlyphIndex, setHiddenGlyphIndex] = useState<number>(2); // 3rd glyph is hidden
+  const [scannerActive, setScannerActive] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const uniqueGlyphs = shuffleArray(GLYPHS).slice(0, config.glyphGridSize * config.glyphGridSize);
+    const sequence = uniqueGlyphs.slice(0, config.glyphSequenceLength);
+    setTargetSequence(sequence);
+    setGrid(shuffleArray(uniqueGlyphs));
+    
+    const totalTime = 2000 + config.glyphSequenceLength * 500;
+    setCountdown(Math.ceil(totalTime / 1000));
+    
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    setTimeout(() => {
+      setIsShowing(false);
+      clearInterval(countdownInterval);
+    }, totalTime);
+    
+    return () => clearInterval(countdownInterval);
+  }, [config]);
+
+  const handleGlyphClick = (glyph: string, index: number) => {
+    if (isShowing) return;
+    
+    // If entity not purged and clicking on hidden glyph area, show warning
+    if (!entityPurged && index === hiddenGlyphIndex) {
+      // Can't click - entity is blocking
+      return;
+    }
+    
+    const newSequence = [...playerSequence, glyph];
+    setPlayerSequence(newSequence);
+    
+    // Check if correct so far
+    if (glyph !== targetSequence[newSequence.length - 1]) {
+      setTimeout(onFail, 500);
+    } else if (newSequence.length === targetSequence.length) {
+      setTimeout(onComplete, 500);
+    }
+  };
+
+  const handleScannerUse = (index: number) => {
+    if (index === hiddenGlyphIndex && !entityFound) {
+      setEntityFound(true);
+      setScannerActive(false);
+    }
+  };
+
+  const handlePurgeUse = () => {
+    if (entityFound && !entityPurged) {
+      setEntityPurged(true);
+    }
+  };
+  
+  return (
+    <div className="w-full max-w-4xl flex flex-col items-center px-4 gap-8">
+      {/* Show Entity Card only after found, in top right */}
+      {entityFound && (
+        <div className="fixed top-20 right-6 z-40 animate-fade-in">
+          <HuntedEntity name="VOID WRAITH" level={1} />
+        </div>
+      )}
+
+      <div className="w-full max-w-2xl flex flex-col items-center">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <p className="font-tech text-neon-red text-xs tracking-[0.3em] uppercase mb-2">// PHASE 01</p>
+          <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">PATTERN RECOGNITION</h3>
+          <p className="font-tech text-ash/60 text-xs tracking-wider">
+            {!entityPurged && !isShowing 
+              ? "⚠️ Signal corrupted - Use VOID SCANNER to detect interference" 
+              : isShowing 
+                ? "Memorize the corrupted glyph sequence" 
+                : "Replicate the sequence to decrypt the signal"}
+          </p>
+        </div>
+
+      {/* Sequence Display */}
+      <div className="relative w-full bg-black/50 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-8 min-h-[120px] flex items-center justify-center shadow-lg">
+        {/* Status indicator */}
+        <div className="absolute top-3 left-3 font-tech text-[10px] tracking-wider bg-black/80 border border-white/20 rounded px-3 py-1.5">
+          {isShowing ? (
+            <span className="text-neon-red">MEMORIZE: {countdown}s</span>
+          ) : (
+            <span className="text-white">INPUT: {playerSequence.length}/{targetSequence.length}</span>
+          )}
+        </div>
+        
+        <div className="flex items-center justify-center gap-4 md:gap-6 flex-wrap">
+          {isShowing ? (
+            targetSequence.map((g, i) => {
+              // Hide the 3rd glyph if entity not purged
+              if (i === hiddenGlyphIndex && !entityPurged) {
+                return (
+                  <div 
+                    key={i} 
+                    className="relative"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    {/* Corrupted/Hidden glyph */}
+                    <div className="relative bg-black/80 backdrop-blur-sm border-2 border-neon-red/50 rounded-xl w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-[0_0_20px_rgba(255,42,42,0.3)]">
+                      <span className="text-2xl md:text-3xl text-neon-red/30 font-bold animate-pulse">
+                        ？
+                      </span>
+                      <div className="absolute inset-0 bg-neon-red/10 animate-pulse rounded-xl"></div>
+                    </div>
+                  </div>
+                );
+              }
+              
+              return (
+                <div 
+                  key={i} 
+                  className="relative"
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                >
+                  {/* Glow background */}
+                  <div className="absolute inset-0 bg-neon-red/20 blur-xl rounded-full animate-pulse"></div>
+                  {/* Glyph with border - smaller size */}
+                  <div className="relative bg-black/80 backdrop-blur-sm border-2 border-neon-red rounded-xl w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-[0_0_20px_rgba(255,42,42,0.6)] animate-pulse">
+                    <span className="text-2xl md:text-3xl text-neon-red font-bold">
+                      {g}
+                    </span>
+                  </div>
+                </div>
+              );
+            }))
+          ) : playerSequence.length > 0 ? (
+            playerSequence.map((g, i) => (
+              <div 
+                key={i} 
+                className="relative animate-fade-in"
+              >
+                {/* Glow background */}
+                <div className="absolute inset-0 bg-neon-red/20 blur-xl rounded-full"></div>
+                {/* Glyph with border - smaller size */}
+                <div className="relative bg-gradient-to-br from-neon-red/30 to-neon-red/20 backdrop-blur-sm border-2 border-neon-red rounded-xl w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-[0_0_20px_rgba(255,42,42,0.5)]">
+                  <span className="text-2xl md:text-3xl text-neon-red font-bold">
+                    {g}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="font-tech text-ash/40 text-sm tracking-wider">SELECT GLYPHS BELOW</p>
+          )}
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="relative">
+        <div className={`grid gap-3 md:gap-4`} style={{gridTemplateColumns: `repeat(${config.glyphGridSize}, minmax(0, 1fr))`}}>
+          {grid.map((glyph, i) => {
+            const isUsed = playerSequence.includes(glyph);
+            const isDisabled = isShowing;
+            
+            return (
+              <button 
+                key={i} 
+                onClick={() => handleGlyphClick(glyph)} 
+                disabled={isDisabled}
+                className={`group relative overflow-hidden w-16 h-16 md:w-20 md:h-20 backdrop-blur-sm border-2 rounded-xl flex items-center justify-center transition-all duration-300 font-bold
+                ${isDisabled ? 'bg-black/30 text-ash/20 cursor-not-allowed border-white/5 shadow-none' : 'bg-gradient-to-br from-black/70 to-black/50 cursor-pointer border-white/30 hover:scale-110 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'}
+                ${!isDisabled && !isUsed ? 'hover:from-neon-red hover:to-neon-red/80 hover:border-neon-red hover:text-black hover:shadow-[0_8px_30px_rgba(255,42,42,0.6)]' : ''}
+                ${isUsed ? '!bg-gradient-to-br !from-neon-red/20 !to-neon-red/10 !border-neon-red !text-neon-red !shadow-[0_0_20px_rgba(255,42,42,0.4)] opacity-60 cursor-not-allowed' : ''}`}
+              >
+                {/* Glow effect behind icon */}
+                {!isDisabled && !isUsed && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                )}
+                
+                {/* Shining Wipe Effect */}
+                {!isDisabled && !isUsed && (
+                  <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/40 to-transparent z-20 skew-x-12"></div>
+                )}
+                
+                {/* Icon with enhanced styling - perfectly centered */}
+                <span className={`relative z-10 text-3xl md:text-4xl leading-none transition-all duration-300
+                  ${isDisabled ? '' : 'text-white group-hover:scale-110'}
+                  ${isUsed ? 'font-extrabold' : 'font-bold'}
+                `} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                  {glyph}
+                </span>
+                
+                {/* Subtle inner shadow for depth */}
+                <div className="absolute inset-0 rounded-xl shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] pointer-events-none"></div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      </div>
+    </div>
+  );
+};

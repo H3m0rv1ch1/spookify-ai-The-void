@@ -17,6 +17,7 @@ const App: React.FC = () => {
   
   // Game/Corruption State
   const [hasPurged, setHasPurged] = useState(false);
+  const [credits, setCredits] = useState(0);
   
   // Custom Style State
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -830,6 +831,14 @@ const App: React.FC = () => {
           <div className="font-display font-bold text-xl text-white pointer-events-auto cursor-pointer" onClick={handleReset}>
               SPOOKIFY<span className="text-neon-red">.AI</span>
           </div>
+          
+          {/* Credits Display - Only show if user has credits */}
+          {credits > 0 && (
+            <div className="font-tech text-xs uppercase tracking-wider flex items-center gap-2 px-3 py-1.5 bg-neon-red/10 border border-neon-red/30 rounded pointer-events-auto backdrop-blur-sm">
+              <span className="text-ash/60">CREDITS:</span>
+              <span className="text-neon-red font-bold">{credits}</span>
+            </div>
+          )}
         </nav>
       )}
 
@@ -840,7 +849,10 @@ const App: React.FC = () => {
          {appState === AppState.UPLOADING && renderUpload()}
          {appState === AppState.GENERATING && <GeneratingView />}
          {appState === AppState.RESULT && renderResult()}
-         {appState === AppState.GAME && <SignalCorruptionGame onExit={handleReset} onVictory={handleGameVictory} />}
+         {appState === AppState.GAME && <SignalCorruptionGame onExit={(earnedCredits) => {
+           setCredits(prev => prev + earnedCredits);
+           handleReset();
+         }} onVictory={handleGameVictory} credits={credits} onCreditsChange={setCredits} />}
          {appState === AppState.CORRUPTION && <CorruptionEvent onFix={() => setAppState(AppState.GAME)} />}
       </main>
 
