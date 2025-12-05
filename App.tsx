@@ -8,7 +8,20 @@ import { SignalCorruptionGame } from './components/SignalCorruptionGame';
 import { CorruptionEvent } from './components/CorruptionEvent';
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>(AppState.IDLE);
+  const [appState, setAppState] = useState<AppState>(() => {
+    // Initialize from URL if present
+    const path = window.location.pathname.replace('/', '');
+    switch (path) {
+      case 'upload': return AppState.IDLE;
+      case 'select-style': return AppState.SELECTING;
+      case 'customize': return AppState.UPLOADING;
+      case 'corruption': return AppState.CORRUPTION;
+      case 'minigame': return AppState.GAME;
+      case 'generating': return AppState.GENERATING;
+      case 'result': return AppState.RESULT;
+      default: return AppState.IDLE;
+    }
+  });
   const [selectedStyle, setSelectedStyle] = useState<CostumeStyle | null>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -47,6 +60,25 @@ const App: React.FC = () => {
   // Comparison Slider
   const [sliderPosition, setSliderPosition] = useState(50);
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Update URL based on app state
+  useEffect(() => {
+    const stateToPath: Partial<Record<AppState, string>> = {
+      [AppState.IDLE]: '/upload',
+      [AppState.SELECTING]: '/select-style',
+      [AppState.UPLOADING]: '/customize',
+      [AppState.CORRUPTION]: '/corruption',
+      [AppState.GAME]: '/minigame',
+      [AppState.GENERATING]: '/generating',
+      [AppState.RESULT]: '/result',
+      [AppState.ERROR]: '/error',
+    };
+    
+    const newPath = stateToPath[appState] || '/';
+    if (window.location.pathname !== newPath) {
+      window.history.pushState({}, '', newPath);
+    }
+  }, [appState]);
 
   // Persist credits and hasPurged to localStorage
   useEffect(() => {
@@ -131,11 +163,17 @@ const App: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (!originalImage || !selectedStyle) return;
+    console.log('Execute Ritual clicked!', { originalImage: !!originalImage, selectedStyle: !!selectedStyle, hasPurged, credits });
+    
+    if (!originalImage || !selectedStyle) {
+      console.log('Missing image or style');
+      return;
+    }
 
     // --- CORRUPTION EVENT TRIGGER ---
     // If the user hasn't purged the system yet, hijack the process
     if (!hasPurged) {
+      console.log('Triggering corruption event');
       setAppState(AppState.CORRUPTION);
       return;
     }
@@ -164,7 +202,7 @@ const App: React.FC = () => {
   
   const handleGameVictory = () => {
       setHasPurged(true);
-      setAppState(AppState.UPLOADING);
+      setAppState(AppState.IDLE); // Go back to home page instead of style selection
       setSuccessMessage("SYSTEM RESTORED. SIGNAL PURGED.");
       // Clear success message after a few seconds
       setTimeout(() => setSuccessMessage(null), 5000);
