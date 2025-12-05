@@ -6,10 +6,39 @@
   body {
     @apply bg-void text-off-white overflow-x-hidden;
     cursor: crosshair;
+    /* Prevent zoom on double-tap for mobile */
+    touch-action: manipulation;
+    /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent text size adjustment on mobile */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Optimize for mobile performance */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer utilities {
+  /* Hide scrollbars utility class */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+    width: 0;
+    height: 0;
+  }
+  
   /* Animated Grid Background */
   .bg-grid {
     background-size: 40px 40px;
@@ -73,4 +102,94 @@
 ::selection {
   background: #FF2A2A;
   color: #000;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* COMPLETELY HIDE ALL SCROLLBARS ON MOBILE */
+  
+  /* Global scrollbar hiding for all elements */
+  *, *::before, *::after {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none !important; /* Safari and Chrome */
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  /* Body and HTML */
+  body, html {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  body::-webkit-scrollbar, 
+  html::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  /* Hide scrollbars for specific overflow containers */
+  .overflow-auto::-webkit-scrollbar,
+  .overflow-y-auto::-webkit-scrollbar,
+  .overflow-x-auto::-webkit-scrollbar,
+  .overflow-scroll::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-scroll {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  /* Hide scrollbars for any div with scrolling */
+  div::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  div {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  /* Reduce animations on mobile for better performance */
+  .animate-spin-slow {
+    animation-duration: 8s !important;
+  }
+  
+  /* Optimize grid background for mobile */
+  .bg-grid {
+    background-size: 20px 20px;
+    opacity: 0.5;
+  }
+  
+  /* Reduce blur effects on mobile */
+  .blur-2xl {
+    filter: blur(40px) !important;
+  }
+  
+  /* Optimize font sizes for mobile readability */
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .bg-grid {
+    background-size: 30px 30px;
+  }
 }

@@ -309,11 +309,11 @@ const App: React.FC = () => {
           </span>
         </div>
 
-        <h1 className="font-display font-extrabold text-6xl sm:text-8xl md:text-[8rem] lg:text-[10rem] leading-[0.9] tracking-tighter text-white mix-blend-difference mb-8">
+        <h1 className="font-display font-extrabold text-4xl xs:text-5xl sm:text-6xl md:text-[8rem] lg:text-[10rem] leading-[0.9] tracking-tighter text-white mix-blend-difference mb-6 md:mb-8">
           SPOOK<span className="text-transparent text-outline hover:text-white transition-colors duration-500 cursor-none">IFY</span>
         </h1>
 
-        <div className="max-w-3xl mx-auto mb-16 relative group text-center px-8">
+        <div className="max-w-3xl mx-auto mb-8 md:mb-16 relative group text-center px-4 md:px-8">
            {/* Decorative lines around text */}
            <div className="absolute -left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:via-neon-red/50 transition-all duration-500 hidden md:block"></div>
            <div className="absolute -right-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:via-neon-red/50 transition-all duration-500 hidden md:block"></div>
@@ -323,23 +323,23 @@ const App: React.FC = () => {
                 // System Status: Awaiting Bio-Data
               </p>
               
-              <p className="font-display text-ash/90 text-xl md:text-2xl leading-relaxed tracking-wide text-shimmer">
+              <p className="font-display text-ash/90 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed tracking-wide text-shimmer">
                 Unlock the dark potential of your digital twin. 
                 Our neural engines are primed to deconstruct your reality and 
                 reforge it into a <span className="text-white italic bg-white/5 px-2">cinematic nightmare</span>.
               </p>
               
               <div className="flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-white/5 mt-2">
-                <span className="font-tech text-ash/40 text-[10px] md:text-xs tracking-[0.2em] uppercase">Upload Image</span>
+                <span className="font-tech text-ash/40 text-[9px] xs:text-[10px] md:text-xs tracking-[0.2em] uppercase">Upload Image</span>
                 <span className="w-1 h-1 bg-neon-red rounded-full hidden sm:block"></span>
-                <span className="font-tech text-ash/40 text-[10px] md:text-xs tracking-[0.2em] uppercase">Choose Style</span>
+                <span className="font-tech text-ash/40 text-[9px] xs:text-[10px] md:text-xs tracking-[0.2em] uppercase">Choose Style</span>
                 <span className="w-1 h-1 bg-neon-red rounded-full hidden sm:block"></span>
-                <span className="font-tech text-ash/40 text-[10px] md:text-xs tracking-[0.2em] uppercase">Enter The Void</span>
+                <span className="font-tech text-ash/40 text-[9px] xs:text-[10px] md:text-xs tracking-[0.2em] uppercase">Enter The Void</span>
               </div>
            </div>
         </div>
 
-        <SpookyButton variant="ritual" onClick={() => setAppState(AppState.SELECTING)} className="text-lg shadow-[0_0_50px_rgba(255,42,42,0.2)]">
+        <SpookyButton variant="ritual" onClick={() => setAppState(AppState.SELECTING)} className="text-sm md:text-lg shadow-[0_0_50px_rgba(255,42,42,0.2)] px-6 md:px-10 py-3 md:py-5">
             INITIALIZE RITUAL
         </SpookyButton>
       </div>
