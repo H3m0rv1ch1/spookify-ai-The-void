@@ -979,7 +979,7 @@ const VictoryScreen: React.FC<{ onRestart: () => void; onExit: () => void; onVic
     <div className="text-center flex flex-col items-center gap-6">
         {/* Header */}
         <div className="animate-fade-in">
-            <p className="font-tech text-green-500 text-xs tracking-[0.3em] uppercase mb-2 animate-pulse">// MISSION COMPLETE</p>
+            <p className="font-tech text-neon-red text-xs tracking-[0.3em] uppercase mb-2 animate-pulse">// MISSION COMPLETE</p>
             <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
                 SIGNAL STABILIZED
             </h2>

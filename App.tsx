@@ -16,8 +16,14 @@ const App: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   // Game/Corruption State
-  const [hasPurged, setHasPurged] = useState(false);
-  const [credits, setCredits] = useState(0);
+  const [hasPurged, setHasPurged] = useState(() => {
+    const saved = localStorage.getItem('spookify_hasPurged');
+    return saved === 'true';
+  });
+  const [credits, setCredits] = useState(() => {
+    const saved = localStorage.getItem('spookify_credits');
+    return saved ? parseInt(saved, 10) : 0;
+  });
   
   // Custom Style State
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -41,6 +47,15 @@ const App: React.FC = () => {
   // Comparison Slider
   const [sliderPosition, setSliderPosition] = useState(50);
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Persist credits and hasPurged to localStorage
+  useEffect(() => {
+    localStorage.setItem('spookify_credits', credits.toString());
+  }, [credits]);
+
+  useEffect(() => {
+    localStorage.setItem('spookify_hasPurged', hasPurged.toString());
+  }, [hasPurged]);
 
   useEffect(() => {
     // Initial center position
@@ -125,11 +140,20 @@ const App: React.FC = () => {
       return;
     }
 
+    // --- CREDIT CHECK ---
+    // User must have at least 1 credit to generate an image
+    if (credits <= 0) {
+      setError("INSUFFICIENT CREDITS. COMPLETE MINIGAMES TO EARN CREDITS.");
+      return;
+    }
+
     setAppState(AppState.GENERATING);
     setError(null);
     try {
       const result = await generateSpookyImage(originalImage, selectedStyle.promptModifier);
       setGeneratedImage(result);
+      // Deduct 1 credit after successful generation
+      setCredits(prev => prev - 1);
       setAppState(AppState.RESULT);
     } catch (err: any) {
       console.error(err);
@@ -277,15 +301,9 @@ const App: React.FC = () => {
            </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6">
-            <SpookyButton variant="ritual" onClick={() => setAppState(AppState.SELECTING)} className="text-lg shadow-[0_0_50px_rgba(255,42,42,0.2)]">
-                INITIALIZE RITUAL
-            </SpookyButton>
-            
-            <SpookyButton variant="ghost" onClick={() => setAppState(AppState.GAME)} className="text-lg">
-                ACCESS TERMINAL
-            </SpookyButton>
-        </div>
+        <SpookyButton variant="ritual" onClick={() => setAppState(AppState.SELECTING)} className="text-lg shadow-[0_0_50px_rgba(255,42,42,0.2)]">
+            INITIALIZE RITUAL
+        </SpookyButton>
       </div>
     </div>
   );
