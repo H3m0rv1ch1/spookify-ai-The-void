@@ -21,56 +21,15 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
     }
     return Array.from(s).sort((a,b) => a - b);
   });
+  const [destroyedSpikes, setDestroyedSpikes] = useState<Set<number>>(new Set());
+  const [explodingSpikes, setExplodingSpikes] = useState<Set<number>>(new Set());
   const [isHolding, setIsHolding] = useState(false);
   const [nextSpikeIndex, setNextSpikeIndex] = useState(0);
-  const [clearedSpikes, setClearedSpikes] = useState<Set<number>>(new Set());
-  const [spikePositions] = useState(() => 
-    spikes.map(() => ({
-      x: Math.random() * 70 + 15, // 15-85% of screen width
-      y: Math.random() * 70 + 15  // 15-85% of screen height
-    }))
-  );
-  const [holdingSpike, setHoldingSpike] = useState<number | null>(null);
-  const [spikeHoldProgress, setSpikeHoldProgress] = useState(0);
-  const spikeHoldRef = useRef<number | undefined>(undefined);
   const intervalRef = useRef<number | undefined>(undefined);
 
-  const startHoldingSpike = (spikeIndex: number) => {
-    if (!purgeActive || clearedSpikes.has(spikes[spikeIndex])) return;
-    console.log('Started holding spike:', spikeIndex);
-    setHoldingSpike(spikeIndex);
-    setSpikeHoldProgress(0);
-    
-    spikeHoldRef.current = window.setInterval(() => {
-      setSpikeHoldProgress(prev => {
-        const newProgress = prev + 2; // 2% per 50ms = 2.5 seconds to clear
-        if (newProgress >= 100) {
-          if (spikeHoldRef.current !== undefined) window.clearInterval(spikeHoldRef.current);
-          setClearedSpikes(prevCleared => {
-            const newSet = new Set(prevCleared);
-            newSet.add(spikes[spikeIndex]);
-            return newSet;
-          });
-          setHoldingSpike(null);
-          setSpikeHoldProgress(0);
-          return 100;
-        }
-        return newProgress;
-      });
-    }, 50);
-  };
-
-  const stopHoldingSpike = () => {
-    if (spikeHoldRef.current !== undefined) window.clearInterval(spikeHoldRef.current);
-    setHoldingSpike(null);
-    setSpikeHoldProgress(0);
-  };
-
-  const allSpikesCleared = spikes.every(spike => clearedSpikes.has(spike));
-
   const startProgress = () => {
-    console.log('startProgress called', { progress, purgeActive, entityFound, allSpikesCleared });
-    if(progress >= 100 || !purgeActive || !entityFound || !allSpikesCleared) {
+    console.log('startProgress called', { progress, purgeActive, entityFound });
+    if(progress >= 100 || !purgeActive || !entityFound) {
       console.log('Cannot start - conditions not met');
       return;
     }
@@ -80,7 +39,25 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
       setProgress(p => {
         const newP = p + (100 / (config.purgeDuration / 50));
         
-        // Reached 100% - SUCCESS (no more spike checks since they're all cleared)
+        // Check if we hit a spike that hasn't been destroyed yet
+        const hitSpike = spikes.find(s => !destroyedSpikes.has(s) && s > p && s <= newP);
+        if (hitSpike) {
+          console.log('Hit spike at', hitSpike, '- Exploding!');
+          // Mark spike as exploding
+          setExplodingSpikes(prev => new Set(prev).add(hitSpike));
+          // After animation, mark as destroyed
+          setTimeout(() => {
+            setDestroyedSpikes(prev => new Set(prev).add(hitSpike));
+            setExplodingSpikes(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(hitSpike);
+              return newSet;
+            });
+          }, 300);
+          // Continue progress
+        }
+        
+        // Reached 100% - SUCCESS
         if (newP >= 100) {
           console.log('Reached 100%!');
           if(intervalRef.current !== undefined) window.clearInterval(intervalRef.current);
@@ -97,15 +74,13 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
   const stopProgress = () => {
     setIsHolding(false);
     if(intervalRef.current !== undefined) window.clearInterval(intervalRef.current);
-    // When releasing, just stop - no penalty, no success
-    // Player must release BEFORE spikes and continue holding after
   };
 
   useEffect(() => {
-    // Update next spike indicator
-    const nextSpike = spikes.findIndex(s => s > progress);
+    // Update next spike indicator - only count non-destroyed spikes
+    const nextSpike = spikes.findIndex(s => !destroyedSpikes.has(s) && s > progress);
     setNextSpikeIndex(nextSpike);
-  }, [progress, spikes]);
+  }, [progress, spikes, destroyedSpikes]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -119,7 +94,6 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
     
     return () => {
       if(intervalRef.current !== undefined) window.clearInterval(intervalRef.current);
-      if(spikeHoldRef.current !== undefined) window.clearInterval(spikeHoldRef.current);
       window.removeEventListener('mousemove', handleMouseMove as any);
     };
   }, [radioActive, scannerActive]);
@@ -213,16 +187,16 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
                     return (
                       <div 
                         key={i}
-                        className={`flex-1 transition-all duration-150 relative ${
+                        className={`flex-1 transition-all duration-75 relative ${
                           isActive 
                             ? isNearEntity 
                               ? 'bg-neon-red shadow-[0_0_15px_rgba(255,42,42,1)] animate-pulse' 
-                              : 'bg-cyan-400'
+                              : 'bg-neon-red/70 shadow-[0_0_8px_rgba(255,42,42,0.6)]'
                             : 'bg-white/10'
                         }`}
                         style={{ 
                           height: `${(i + 1) * 10}%`,
-                          animationDelay: `${i * 0.05}s`
+                          animationDelay: `${i * 0.02}s`
                         }}
                       >
                         {/* Extra glow layer for active bars when near entity */}
@@ -274,90 +248,8 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
             ? <span className="text-neon-red animate-pulse">⚠️ Use RADIO DECODER to locate entity, then VOID SCANNER to reveal</span>
             : !purgeActive 
               ? <span className="text-neon-red animate-pulse">⚠️ Select NEURAL PURGE tool to activate</span>
-              : !allSpikesCleared
-                ? <span className="text-neon-red animate-pulse">⚠️ Click all {spikes.length} red spikes to clear them first ({clearedSpikes.size}/{spikes.length})</span>
-                : "All spikes cleared! Hold button to charge to 100%."}
+              : "Hold the center circle to charge to 100%. Spikes will explode when touched!"}
         </p>
-        
-        {/* Spike Locations - Hold to deactivate */}
-        {purgeActive && spikePositions.map((pos, idx) => {
-          const spike = spikes[idx];
-          const isCleared = clearedSpikes.has(spike);
-          const isHoldingThis = holdingSpike === idx;
-          
-          return (
-            <div
-              key={idx}
-              className="fixed z-40 animate-fade-in"
-              style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: isCleared ? 'none' : 'auto'
-              }}
-              onMouseDown={() => startHoldingSpike(idx)}
-              onMouseUp={stopHoldingSpike}
-              onMouseLeave={stopHoldingSpike}
-              onTouchStart={() => startHoldingSpike(idx)}
-              onTouchEnd={stopHoldingSpike}
-            >
-              <div className="relative">
-                {/* Outer glow */}
-                <div className={`absolute inset-0 rounded-full w-16 h-16 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 transition-all duration-300 ${
-                  isCleared 
-                    ? 'bg-green-500/20 blur-xl' 
-                    : isHoldingThis 
-                      ? 'bg-neon-red/40 blur-2xl animate-pulse' 
-                      : 'bg-neon-red/20 blur-xl animate-pulse'
-                }`}></div>
-                
-                {/* Spike marker */}
-                <div className={`relative w-12 h-12 rounded-full border-4 flex items-center justify-center cursor-pointer transition-all duration-300 ${
-                  isCleared
-                    ? 'bg-green-500/20 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.8)]'
-                    : isHoldingThis
-                      ? 'bg-neon-red/30 border-neon-red shadow-[0_0_30px_rgba(255,42,42,1)] scale-110'
-                      : 'bg-black/80 border-neon-red shadow-[0_0_20px_rgba(255,42,42,0.6)] hover:scale-110'
-                }`}>
-                  {/* Progress ring when holding */}
-                  {isHoldingThis && (
-                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        stroke="#FF2A2A"
-                        strokeWidth="8"
-                        fill="none"
-                        strokeDasharray="283"
-                        strokeDashoffset={283 - (spikeHoldProgress / 100) * 283}
-                        className="transition-all duration-100"
-                      />
-                    </svg>
-                  )}
-                  
-                  {/* Icon */}
-                  <span className={`relative z-10 text-2xl ${isCleared ? '' : 'animate-pulse'}`}>
-                    {isCleared ? '✓' : '⚠️'}
-                  </span>
-                </div>
-                
-                {/* Label */}
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <p className={`font-tech text-[9px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                    isCleared
-                      ? 'text-green-500 bg-green-500/10'
-                      : isHoldingThis
-                        ? 'text-neon-red bg-black/90 animate-pulse'
-                        : 'text-neon-red bg-black/80'
-                  }`}>
-                    {isCleared ? 'CLEARED' : isHoldingThis ? `${spikeHoldProgress.toFixed(0)}%` : 'HOLD TO CLEAR'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
         
         {/* Entity Reveal with Scanner - ONLY when scanner is active AND near entity */}
         {scannerActive && isNearEntity && !entityFound && (
@@ -371,17 +263,47 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
             }}
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-neon-red/30 blur-2xl rounded-full w-32 h-32 animate-pulse"></div>
+              {/* Custom Entity Icon - Clean outline only */}
               <div 
-                className="relative text-6xl cursor-pointer pointer-events-auto"
+                className="relative w-24 h-24 cursor-pointer pointer-events-auto group"
                 onClick={() => setEntityFound(true)}
               >
-                👻
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  {/* Main entity body - ghost/wraith shape - outline only */}
+                  <g className="group-hover:scale-110 transition-transform duration-200">
+                    {/* Body outline */}
+                    <path
+                      d="M 50 25 Q 35 25 30 40 Q 28 50 28 60 L 28 75 Q 32 72 35 75 Q 38 78 41 75 Q 44 72 47 75 Q 50 78 53 75 Q 56 72 59 75 Q 62 78 65 75 Q 68 72 72 75 L 72 60 Q 72 50 70 40 Q 65 25 50 25 Z"
+                      fill="none"
+                      stroke="#FF2A2A"
+                      strokeWidth="2"
+                      className="animate-pulse"
+                    />
+                    
+                    {/* Eyes */}
+                    <circle cx="42" cy="48" r="3" fill="#FF2A2A" className="animate-pulse" />
+                    <circle cx="58" cy="48" r="3" fill="#FF2A2A" className="animate-pulse" />
+                    
+                    {/* Mouth */}
+                    <path
+                      d="M 42 58 Q 50 62 58 58"
+                      fill="none"
+                      stroke="#FF2A2A"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                </svg>
               </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                <p className="font-tech text-[10px] text-neon-red uppercase tracking-wider bg-black/90 px-2 py-1 rounded animate-pulse">
-                  CLICK TO CAPTURE
-                </p>
+              
+              {/* Label */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-neon-red/20 blur-md"></div>
+                  <p className="relative font-tech text-[10px] text-neon-red uppercase tracking-wider bg-black/90 px-3 py-1 rounded border border-neon-red/30 animate-pulse shadow-[0_0_15px_rgba(255,42,42,0.5)]">
+                    ⚠️ CLICK TO CAPTURE
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -401,97 +323,301 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
       </div>
 
       {/* Purge Circle */}
-      <div className="relative w-56 h-56 md:w-64 md:h-64">
-        {/* Outer glow ring */}
+      <div className="relative w-64 h-64 md:w-72 md:h-72">
+        {/* Outer glow rings - multiple layers */}
         <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
-          isHolding ? 'bg-neon-red/20 blur-2xl animate-pulse' : 'bg-neon-red/5 blur-xl'
+          isHolding ? 'bg-neon-red/30 blur-3xl animate-pulse' : 'bg-neon-red/10 blur-2xl'
+        }`}></div>
+        <div className={`absolute inset-4 rounded-full transition-all duration-300 ${
+          isHolding ? 'bg-neon-red/20 blur-xl animate-pulse' : 'bg-neon-red/5 blur-lg'
         }`}></div>
         
+        {/* Tech grid background */}
+        <div className="absolute inset-0 rounded-full overflow-hidden opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(rgba(255,42,42,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,42,42,0.3) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}></div>
+        </div>
+        
         <svg className="w-full h-full relative z-10" viewBox="0 0 100 100">
-          {/* Background Track */}
-          <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="none" />
+          {/* Outer decorative ring */}
+          <circle cx="50" cy="50" r="48" stroke="rgba(255,42,42,0.2)" strokeWidth="0.5" fill="none" />
           
-          {/* Progress Circle */}
+          {/* Background Track - thicker and more defined */}
+          <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" />
+          
+          {/* Inner shadow track */}
+          <circle cx="50" cy="50" r="45" stroke="rgba(0,0,0,0.5)" strokeWidth="8" fill="none" opacity="0.3" />
+          
+          {/* Progress Circle - Enhanced */}
           <circle 
             cx="50" 
             cy="50" 
             r="45" 
-            stroke="#FF2A2A" 
-            strokeWidth="6" 
+            stroke="url(#progressGradient)" 
+            strokeWidth="8" 
             fill="none"
             strokeDasharray="283"
             strokeDashoffset={283 - (progress / 100) * 283}
             transform="rotate(-90 50 50)"
             className="transition-all duration-100"
             style={{ 
-              filter: isHolding ? 'drop-shadow(0 0 8px #FF2A2A)' : 'none'
+              filter: isHolding ? 'drop-shadow(0 0 12px #FF2A2A) drop-shadow(0 0 6px #FF2A2A)' : 'drop-shadow(0 0 4px #FF2A2A)'
             }}
           />
           
-          {/* Danger Spikes - Visual indicators */}
+          {/* Progress gradient definition */}
+          <defs>
+            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#FF2A2A" stopOpacity="1" />
+              <stop offset="50%" stopColor="#FF5555" stopOpacity="1" />
+              <stop offset="100%" stopColor="#FF2A2A" stopOpacity="1" />
+            </linearGradient>
+            <linearGradient id="spikeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FF5555" stopOpacity="1" />
+              <stop offset="50%" stopColor="#FF2A2A" stopOpacity="1" />
+              <stop offset="100%" stopColor="#CC0000" stopOpacity="1" />
+            </linearGradient>
+            <filter id="spikeGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          
+          {/* Tick marks every 10% - Smaller */}
+          {[...Array(10)].map((_, i) => {
+            const angle = i * 36;
+            const isActive = progress >= (i * 10);
+            return (
+              <g key={`tick-${i}`} transform={`rotate(${angle} 50 50)`}>
+                <line
+                  x1="50"
+                  y1="3"
+                  x2="50"
+                  y2="5.5"
+                  stroke={isActive ? '#FF2A2A' : 'rgba(255,255,255,0.2)'}
+                  strokeWidth="0.8"
+                  opacity={isActive ? 0.8 : 0.4}
+                  className="transition-colors duration-200"
+                />
+              </g>
+            );
+          })}
+          
+          {/* Danger Spikes - With enhanced explosion animation */}
           {spikes.map((spike, idx) => {
-            const isCleared = clearedSpikes.has(spike);
+            const isDestroyed = destroyedSpikes.has(spike);
+            const isExploding = explodingSpikes.has(spike);
             const isPassed = progress > spike;
+            const isNear = Math.abs(progress - spike) < 3 && !isPassed && !isDestroyed;
+            const isTouching = Math.abs(progress - spike) < 1 && !isPassed && !isDestroyed;
+            
+            // Don't render destroyed spikes
+            if (isDestroyed) return null;
             
             return (
               <g 
                 key={spike} 
                 transform={`rotate(${spike * 3.6} 50 50)`}
               >
-                <rect 
-                  x="47" 
-                  y="-2" 
-                  width="6" 
-                  height="12" 
-                  fill={isCleared ? '#22C55E' : isPassed ? '#FFFFFF' : '#FF2A2A'}
-                  opacity={isCleared ? 1 : isPassed ? 0.3 : 0.8}
-                  className={isCleared ? 'animate-pulse' : ''}
-                />
-                {isCleared && (
-                  <rect 
-                    x="47" 
-                    y="-2" 
-                    width="6" 
-                    height="12" 
-                    fill="#22C55E"
-                    opacity="0.5"
-                    className="animate-ping"
-                  />
+                {/* Compact Explosion effect */}
+                {isExploding && (
+                  <>
+                    {/* Core flash */}
+                    <circle 
+                      cx="50" 
+                      cy="4" 
+                      r="2" 
+                      fill="#FFFFFF"
+                      opacity="1"
+                      className="animate-ping"
+                    />
+                    
+                    {/* Shockwave rings - smaller */}
+                    <circle 
+                      cx="50" 
+                      cy="4" 
+                      r="6" 
+                      fill="none"
+                      stroke="#FF2A2A"
+                      strokeWidth="1"
+                      opacity="0.7"
+                      className="animate-ping"
+                    />
+                    <circle 
+                      cx="50" 
+                      cy="4" 
+                      r="5" 
+                      fill="#FF5555"
+                      opacity="0.5"
+                      className="animate-ping"
+                      style={{ animationDelay: '0.05s' }}
+                    />
+                    
+                    {/* Explosion particles - fewer and smaller */}
+                    {[0, 90, 180, 270].map(angle => (
+                      <g key={angle}>
+                        {/* Main particles */}
+                        <circle
+                          cx="50"
+                          cy="4"
+                          r="1"
+                          fill="#FF2A2A"
+                          opacity="0.8"
+                          className="animate-ping"
+                          transform={`rotate(${angle} 50 4) translate(0 -5)`}
+                        />
+                        {/* Spark trails */}
+                        <line
+                          x1="50"
+                          y1="4"
+                          x2="50"
+                          y2="0"
+                          stroke="#FF5555"
+                          strokeWidth="0.3"
+                          opacity="0.5"
+                          className="animate-ping"
+                          transform={`rotate(${angle} 50 4)`}
+                        />
+                      </g>
+                    ))}
+                    
+                    {/* Outer glow - smaller */}
+                    <circle 
+                      cx="50" 
+                      cy="4" 
+                      r="8" 
+                      fill="#FF2A2A"
+                      opacity="0.3"
+                      className="animate-ping"
+                    />
+                  </>
+                )}
+                
+                {/* Glow effect when touching */}
+                {isTouching && isHolding && !isExploding && (
+                  <>
+                    <circle 
+                      cx="50" 
+                      cy="3" 
+                      r="6" 
+                      fill="#FF2A2A"
+                      opacity="0.5"
+                      className="animate-pulse"
+                    />
+                    <circle 
+                      cx="50" 
+                      cy="3" 
+                      r="4" 
+                      fill="#FF5555"
+                      opacity="0.7"
+                      className="animate-ping"
+                    />
+                  </>
+                )}
+                
+                {/* Main spike - diamond/crystal shape */}
+                {!isExploding && (
+                  <g className={isTouching && isHolding ? 'animate-bounce' : ''}>
+                    <path
+                      d="M 50 0 L 48 5 L 50 8 L 52 5 Z"
+                      fill={isPassed ? 'rgba(255,255,255,0.2)' : '#FF2A2A'}
+                      stroke={isPassed ? 'rgba(255,255,255,0.15)' : '#FF0000'}
+                      strokeWidth="0.5"
+                      opacity={isPassed ? 0.4 : 1}
+                    />
+                    
+                    {/* Inner shine */}
+                    {!isPassed && (
+                      <path
+                        d="M 50 1 L 48.5 5 L 50 6 Z"
+                        fill="rgba(255,150,150,0.5)"
+                        opacity="0.7"
+                      />
+                    )}
+                    
+                    {/* Warning dot on top */}
+                    {!isPassed && (
+                      <circle
+                        cx="50"
+                        cy="-2"
+                        r="1"
+                        fill={isTouching ? '#FFFFFF' : '#FF2A2A'}
+                        opacity={isTouching ? 1 : 0.8}
+                        className={isTouching ? 'animate-ping' : ''}
+                      />
+                    )}
+                  </g>
                 )}
               </g>
             );
           })}
+          
+          {/* Center decorative circles */}
+          <circle cx="50" cy="50" r="32" stroke="rgba(255,42,42,0.15)" strokeWidth="0.5" fill="none" />
+          <circle cx="50" cy="50" r="28" stroke="rgba(255,42,42,0.1)" strokeWidth="0.5" fill="none" />
         </svg>
         
-        {/* Center Button */}
+        {/* Center Button - Minimal & Clean */}
         <button 
           onMouseDown={startProgress} 
           onMouseUp={stopProgress} 
           onMouseLeave={stopProgress}
           onTouchStart={startProgress} 
           onTouchEnd={stopProgress}
-          disabled={!purgeActive || !entityFound || !allSpikesCleared}
-          className={`absolute inset-12 md:inset-16 rounded-full flex flex-col items-center justify-center font-display uppercase tracking-widest transition-all duration-200 border-4 z-20
-          ${!purgeActive || !entityFound || !allSpikesCleared
-            ? 'bg-black/90 border-white/20 text-white/30 cursor-not-allowed' 
+          disabled={!purgeActive || !entityFound}
+          className={`absolute inset-[52px] md:inset-[60px] rounded-full flex flex-col items-center justify-center font-display uppercase tracking-widest transition-all duration-200 border-[3px] z-20 overflow-hidden
+          ${!purgeActive || !entityFound
+            ? 'bg-black/95 border-white/20 text-white/30 cursor-not-allowed' 
             : isHolding 
-              ? 'bg-neon-red text-black border-white/50 shadow-[0_0_40px_#ff2a2a] scale-95' 
-              : 'bg-black/80 border-neon-red text-neon-red hover:bg-neon-red/10 hover:scale-105 cursor-pointer'
+              ? 'bg-neon-red/20 border-neon-red text-neon-red shadow-[0_0_40px_#ff2a2a] scale-95' 
+              : 'bg-black/90 border-neon-red text-neon-red hover:bg-neon-red/10 hover:scale-105 cursor-pointer shadow-[inset_0_0_20px_rgba(255,42,42,0.1)]'
           }`}
         >
-          <span className="text-2xl md:text-3xl font-bold mb-1">
-            {!entityFound ? 'FIND ENTITY' : !purgeActive ? 'LOCKED' : !allSpikesCleared ? 'CLEAR SPIKES' : isHolding ? 'PURGING' : 'HOLD'}
+          {/* Simple scan line when holding */}
+          {isHolding && (
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-red/30 to-transparent animate-scan pointer-events-none"></div>
+          )}
+          
+          <span className="text-2xl md:text-3xl font-bold mb-1 relative z-10">
+            {!entityFound ? 'FIND' : !purgeActive ? 'LOCKED' : isHolding ? 'PURGING' : 'HOLD'}
           </span>
-          <span className="text-sm md:text-base font-tech tracking-wider opacity-80">
+          <span className="text-base md:text-lg font-tech tracking-wider opacity-90 relative z-10">
             {progress.toFixed(0)}%
           </span>
+          
+          {/* Corner accents inside button */}
+          <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-current opacity-30"></div>
+          <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-current opacity-30"></div>
+          <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-current opacity-30"></div>
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-current opacity-30"></div>
         </button>
         
-        {/* Corner brackets */}
-        <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-neon-red/50"></div>
-        <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-neon-red/50"></div>
-        <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-neon-red/50"></div>
-        <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-neon-red/50"></div>
+        {/* Enhanced corner brackets with tech details */}
+        <div className="absolute -top-3 -left-3 w-12 h-12 border-t-2 border-l-2 border-neon-red/60">
+          <div className="absolute top-0 left-0 w-2 h-2 bg-neon-red/40"></div>
+        </div>
+        <div className="absolute -top-3 -right-3 w-12 h-12 border-t-2 border-r-2 border-neon-red/60">
+          <div className="absolute top-0 right-0 w-2 h-2 bg-neon-red/40"></div>
+        </div>
+        <div className="absolute -bottom-3 -left-3 w-12 h-12 border-b-2 border-l-2 border-neon-red/60">
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-neon-red/40"></div>
+        </div>
+        <div className="absolute -bottom-3 -right-3 w-12 h-12 border-b-2 border-r-2 border-neon-red/60">
+          <div className="absolute bottom-0 right-0 w-2 h-2 bg-neon-red/40"></div>
+        </div>
+        
+        {/* Tech labels around circle */}
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+          <p className="font-tech text-[8px] text-neon-red/60 tracking-widest">NEURAL INTERFACE</p>
+        </div>
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+          <p className="font-tech text-[8px] text-neon-red/60 tracking-widest">PURGE PROTOCOL</p>
+        </div>
       </div>
 
       {/* Stats Display */}
@@ -499,8 +625,8 @@ export const PurgePhase: React.FC<PurgePhaseProps> = ({ config, onComplete, onFa
         <div className="relative bg-black/80 border-2 border-white/20 p-4 text-center hover:border-white/40 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
           <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white"></div>
           <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-white"></div>
-          <p className="font-tech text-[10px] text-ash/60 tracking-wider uppercase mb-2">Spikes Cleared</p>
-          <p className="font-display text-3xl text-white">{spikes.filter(s => progress > s).length}/{spikes.length}</p>
+          <p className="font-tech text-[10px] text-ash/60 tracking-wider uppercase mb-2">Spikes Destroyed</p>
+          <p className="font-display text-3xl text-white">{destroyedSpikes.size}/{spikes.length}</p>
         </div>
         <div className="relative bg-black/80 border-2 border-neon-red/30 p-4 text-center hover:border-neon-red/50 transition-all duration-300 shadow-[0_0_20px_rgba(255,42,42,0.1)]">
           <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-neon-red"></div>

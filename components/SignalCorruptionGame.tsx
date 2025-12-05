@@ -79,29 +79,38 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
     switch (phase) {
       case 'GLYPH':
         return <GlyphPhase key={`glyph-${level}`} config={config} onComplete={() => {
-          console.log('Phase 1 complete, adding credit');
-          setEarnedCredits(prev => prev + 1);
-          onCreditsChange(credits + earnedCredits + 1);
+          console.log('Phase 1 complete, adding 1 credit');
+          setEarnedCredits(prev => {
+            const newTotal = prev + 1;
+            onCreditsChange(credits + newTotal);
+            return newTotal;
+          });
           handlePhaseComplete('PHASE1_COMPLETE');
         }} onFail={() => setPhase('FAILURE')} scannerActive={selectedTool === 'scanner'} />;
       case 'PHASE1_COMPLETE':
         return <Phase1CompleteScreen onContinue={() => handlePhaseComplete('PURGE')} />;
       case 'PURGE':
         return <PurgePhase key={`purge-${level}`} config={config} onComplete={() => {
-          console.log('Phase 2 complete, adding credit');
-          setEarnedCredits(prev => prev + 1);
-          onCreditsChange(credits + earnedCredits + 1);
+          console.log('Phase 2 complete, adding 2 credits');
+          setEarnedCredits(prev => {
+            const newTotal = prev + 2;
+            onCreditsChange(credits + newTotal);
+            return newTotal;
+          });
           handlePhaseComplete('PHASE2_COMPLETE');
         }} onFail={() => setPhase('FAILURE')} purgeActive={selectedTools.has('purge')} radioActive={selectedTools.has('decoder')} scannerActive={selectedTools.has('scanner')} />;
       case 'PHASE2_COMPLETE':
         return <Phase2CompleteScreen onContinue={() => handlePhaseComplete('WAVEFORM')} />;
       case 'WAVEFORM':
         return <WaveformPhase key={`wave-${level}`} config={config} onComplete={() => {
-          console.log('Phase 3 complete, adding 3 credits');
-          setEarnedCredits(prev => prev + 3);
-          onCreditsChange(credits + earnedCredits + 3);
+          console.log('Phase 3 complete, adding 2 credits');
+          setEarnedCredits(prev => {
+            const newTotal = prev + 2;
+            onCreditsChange(credits + newTotal);
+            return newTotal;
+          });
           handlePhaseComplete('PHASE3_COMPLETE');
-        }} />;
+        }} scannerActive={selectedTools.has('scanner')} radioActive={selectedTools.has('decoder')} />;
       case 'PHASE3_COMPLETE':
         return <Phase3CompleteScreen onContinue={() => setPhase('VICTORY')} />;
       case 'VICTORY':
@@ -113,8 +122,8 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
     }
   };
 
-  // Check if scanner is active (works for both Phase 1 and Phase 2)
-  const isScannerActive = phase === 'PURGE' ? selectedTools.has('scanner') : selectedTool === 'scanner';
+  // Check if scanner is active (works for Phase 1, 2, and 3)
+  const isScannerActive = (phase === 'PURGE' || phase === 'WAVEFORM') ? selectedTools.has('scanner') : selectedTool === 'scanner';
 
   // Get current node number based on phase
   const getCurrentNode = () => {
@@ -157,12 +166,14 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Credits Display */}
-          <div className="font-tech text-xs uppercase tracking-wider flex items-center gap-2 px-3 py-1.5 bg-neon-red/10 border border-neon-red/30 rounded">
-            <span className="text-ash/60">CREDITS:</span>
-            <span className="text-neon-red font-bold">{credits + earnedCredits}</span>
-            {earnedCredits > 0 && <span className="text-green-500 text-[10px]">(+{earnedCredits})</span>}
-          </div>
+          {/* Credits Display - Only show after Phase 1 is completed */}
+          {(phase !== 'INTRO' && phase !== 'GLYPH') && (
+            <div className="font-tech text-xs uppercase tracking-wider flex items-center gap-2 px-3 py-1.5 bg-neon-red/10 border border-neon-red/30 rounded animate-fade-in">
+              <span className="text-ash/60">CREDITS:</span>
+              <span className="text-neon-red font-bold">{credits + earnedCredits}</span>
+              {earnedCredits > 0 && <span className="text-green-500 text-[10px]">(+{earnedCredits})</span>}
+            </div>
+          )}
           
           <button 
             onClick={() => onExit(earnedCredits)} 
@@ -217,7 +228,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                   {/* Void Scanner Tool */}
                   <button 
                     onClick={() => {
-                      if (phase === 'PURGE') {
+                      if (phase === 'PURGE' || phase === 'WAVEFORM') {
                         const newTools = new Set(selectedTools);
                         if (newTools.has('scanner')) newTools.delete('scanner');
                         else newTools.add('scanner');
@@ -227,7 +238,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                       }
                     }}
                     className={`relative p-1.5 bg-black/40 border transition-all w-full text-left cursor-pointer
-                      ${(phase === 'PURGE' ? selectedTools.has('scanner') : selectedTool === 'scanner')
+                      ${((phase === 'PURGE' || phase === 'WAVEFORM') ? selectedTools.has('scanner') : selectedTool === 'scanner')
                         ? 'border-neon-red shadow-[0_0_20px_rgba(255,42,42,0.5)] scale-105' 
                         : 'border-white/10 hover:border-neon-red/30'}`}
                   >
@@ -236,7 +247,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <span className="font-tech text-white text-[8px] uppercase tracking-wider font-bold">
-                        VOID SCANNER {(phase === 'PURGE' ? selectedTools.has('scanner') : selectedTool === 'scanner') && '✓'}
+                        VOID SCANNER {((phase === 'PURGE' || phase === 'WAVEFORM') ? selectedTools.has('scanner') : selectedTool === 'scanner') && '✓'}
                       </span>
                     </div>
                     <p className="font-tech text-ash/60 text-[7px] leading-tight">Detects hidden corruption</p>
@@ -245,7 +256,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                   {/* Radio Decoder Tool */}
                   <button 
                     onClick={() => {
-                      if (phase === 'PURGE') {
+                      if (phase === 'PURGE' || phase === 'WAVEFORM') {
                         const newTools = new Set(selectedTools);
                         if (newTools.has('decoder')) newTools.delete('decoder');
                         else newTools.add('decoder');
@@ -255,7 +266,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                       }
                     }}
                     className={`relative p-1.5 bg-black/40 border transition-all w-full text-left cursor-pointer
-                      ${(phase === 'PURGE' ? selectedTools.has('decoder') : selectedTool === 'decoder')
+                      ${((phase === 'PURGE' || phase === 'WAVEFORM') ? selectedTools.has('decoder') : selectedTool === 'decoder')
                         ? 'border-neon-red shadow-[0_0_20px_rgba(255,42,42,0.5)] scale-105' 
                         : 'border-white/10 hover:border-neon-red/30'}`}
                   >
@@ -264,7 +275,7 @@ export const SignalCorruptionGame: React.FC<SignalCorruptionGameProps> = ({ onEx
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                       <span className="font-tech text-white text-[8px] uppercase tracking-wider font-bold">
-                        RADIO DECODER {(phase === 'PURGE' ? selectedTools.has('decoder') : selectedTool === 'decoder') && '✓'}
+                        RADIO DECODER {((phase === 'PURGE' || phase === 'WAVEFORM') ? selectedTools.has('decoder') : selectedTool === 'decoder') && '✓'}
                       </span>
                     </div>
                     <p className="font-tech text-ash/60 text-[7px] leading-tight">Detects signal frequency</p>
@@ -965,16 +976,32 @@ const IntroScreen: React.FC<{ text: string; onStart: () => void }> = ({ text, on
 };
 
 const VictoryScreen: React.FC<{ onRestart: () => void; onExit: () => void; onVictory?: () => void; }> = ({ onRestart, onExit, onVictory }) => (
-    <div className="text-center flex flex-col items-center gap-8 animate-pulse">
-        <h2 className="font-display text-4xl md:text-6xl text-cyan-400 tracking-widest">SIGNAL STABILIZED</h2>
-        <p className="text-ash/70 max-w-lg">All corrupted nodes have been purged. The Void Echo is contained. System integrity restored to 100%.</p>
-        <div className="flex gap-4">
+    <div className="text-center flex flex-col items-center gap-6">
+        {/* Header */}
+        <div className="animate-fade-in">
+            <p className="font-tech text-green-500 text-xs tracking-[0.3em] uppercase mb-2 animate-pulse">// MISSION COMPLETE</p>
+            <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                SIGNAL STABILIZED
+            </h2>
+            <p className="font-tech text-ash/70 text-sm max-w-lg mx-auto">
+                All corrupted nodes have been purged. The Void Echo is contained. System integrity restored to 100%.
+            </p>
+        </div>
+        
+        {/* Action buttons */}
+        <div className="flex gap-4 animate-fade-in">
             {onVictory ? (
-                <SpookyButton variant="ritual" onClick={onVictory}>RESTORE SYSTEM</SpookyButton>
+                <SpookyButton variant="ritual" onClick={onVictory}>
+                    RESTORE SYSTEM
+                </SpookyButton>
             ) : (
                 <>
-                    <SpookyButton variant="ghost" onClick={onRestart}>REPLAY</SpookyButton>
-                    <SpookyButton variant="primary" onClick={onExit}>EXIT</SpookyButton>
+                    <SpookyButton variant="ghost" onClick={onRestart}>
+                        REPLAY
+                    </SpookyButton>
+                    <SpookyButton variant="primary" onClick={onExit}>
+                        EXIT
+                    </SpookyButton>
                 </>
             )}
         </div>

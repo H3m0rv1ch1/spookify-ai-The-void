@@ -20,15 +20,111 @@ The app features a stunning cyberpunk/glitch aesthetic with custom animations, a
 
 ## How we built it
 - **Frontend**: React + TypeScript with Vite for blazing-fast development
-- **AI Engine**: Google Gemini API for high-quality image transformations
+- **AI Engine**: OpenRouter API for high-quality image transformations (users provide their own API key)
 - **Design System**: Custom Tailwind CSS with cyberpunk/horror theming
 - **Game Logic**: Modular minigame architecture with difficulty scaling across 3 levels
+- **Development Tool**: Kiro AI for rapid prototyping and feature development
 - **UX Features**: 
   - Real-time waveform visualization using Canvas API
   - Speech synthesis for the AI mentor character
   - Custom SVG icons for all 18+ character styles
   - Responsive design that works on mobile and desktop
   - Smooth animations and transitions for immersive experience
+
+## How We Used Kiro
+
+### 🎨 Vibe Coding: Rapid UI Development
+Kiro's vibe coding was instrumental in building our complex UI components. Instead of manually writing hundreds of lines of Tailwind classes and React state management, we described what we wanted and Kiro generated production-ready code.
+
+**Most Impressive Code Generation:**
+The **Waveform Phase minigame** was entirely built through vibe coding. We described: "Create an oscilloscope display with real-time sine wave visualization, three sliders for frequency/amplitude/phase, and match detection logic." Kiro generated:
+- Canvas-based rendering with 60fps animation
+- Mathematical wave calculations with proper phase shifting
+- Real-time matching algorithm comparing user input to target waveform
+- Complete UI with cyberpunk styling, corner brackets, and glow effects
+
+This would have taken hours to implement manually, but Kiro delivered it in minutes with proper TypeScript types and optimized rendering.
+
+**Conversation Structure:**
+1. Started with high-level feature description: "I need a signal calibration minigame"
+2. Refined with specific requirements: "Use Canvas API, sine waves, three adjustable parameters"
+3. Iterated on styling: "Add neon red glow when matched, scanline effects, corner brackets"
+4. Optimized performance: "Use requestAnimationFrame for smooth 60fps rendering"
+
+### 📋 Steering Docs: Maintaining Consistency
+We created three steering documents in `.kiro/steering/` to ensure Kiro understood our project context:
+
+**1. project-context.md** (Always included)
+- Defined our color palette (void, neon-red, ash)
+- Established typography rules (Syne for display, Space Grotesk for tech)
+- Documented animation principles and code conventions
+- Explained the OpenRouter API integration
+
+**Impact:** Every component Kiro generated automatically used our design system. When we asked for "a new button," it came back with proper cyberpunk styling, corner brackets, and neon-red accents without us specifying those details each time.
+
+**2. minigame-development.md** (Conditional - matches `**/minigames/*.tsx`)
+- Standardized minigame architecture (config props, callbacks, state management)
+- Defined difficulty scaling patterns
+- Established performance requirements (60fps, cleanup, no memory leaks)
+
+**Impact:** When developing the Purge Phase and Glyph Phase, Kiro automatically followed the same patterns as the Waveform Phase. All three minigames have consistent APIs and visual styling.
+
+**3. ui-styling.md** (Conditional - matches `**/*.tsx`)
+- Documented component patterns (cards, panels, buttons)
+- Defined responsive design approach
+- Established accessibility guidelines
+
+**Strategy:** Steering docs were our "single source of truth." Instead of repeating design requirements in every conversation, Kiro referenced these docs automatically. This was especially powerful when making global changes - we updated the steering doc once, and all future generations followed the new pattern.
+
+### 🎯 Spec-Driven Development: The Corruption Event
+The **Corruption Event** (the surprise system hijacking) was built using Kiro's spec-driven approach.
+
+**Spec Structure:**
+```
+FEATURE: Corruption Event System
+- Phase 1: 404 Error Screen (static, with reboot button)
+- Phase 2: Boot Sequence (scrolling logs, kernel panic)
+- Phase 3: Alert Screen (AI mentor, typewriter effect, voice synthesis)
+- Transitions: User-triggered (404→Crash) and automatic (Crash→Alert)
+- State Management: Single phase state, cleanup on unmount
+```
+
+**How Spec Improved Development:**
+- **Clarity:** The spec forced us to think through all edge cases upfront (What happens if user refreshes? How do we cleanup speech synthesis?)
+- **Iteration:** We refined the spec twice before implementation, saving debugging time
+- **Documentation:** The spec became our reference for how the corruption event works
+
+**Comparison to Vibe Coding:**
+- **Vibe coding** was faster for isolated components (buttons, cards, individual minigames)
+- **Spec-driven** was better for complex multi-phase flows with state machines
+- We used both: specs for architecture, vibe coding for implementation details
+
+### 🚀 What Made Kiro Indispensable
+
+**1. Context Awareness**
+Kiro remembered our design system across sessions. When we said "add a danger state," it knew to use `neon-red` with glow effects and pulse animations.
+
+**2. TypeScript Expertise**
+All generated code had proper types. The minigame interfaces, state management, and Canvas API usage were type-safe from the start.
+
+**3. Performance Optimization**
+When we mentioned "the waveform is laggy," Kiro immediately suggested `requestAnimationFrame` and debouncing techniques without us asking for specific solutions.
+
+**4. Rapid Iteration**
+We iterated on the radio decoder signal visualization 5+ times (changing colors, animation speeds, bar heights). Each iteration took seconds with Kiro vs. minutes of manual coding.
+
+**5. Learning Accelerator**
+Kiro taught us Canvas API techniques and advanced React patterns while building. The generated code included comments explaining complex math (sine wave calculations, distance formulas for entity detection).
+
+### 📊 Development Metrics
+- **Time Saved:** Estimated 60-70% faster development vs. manual coding
+- **Kiro-Generated Components:** 8 major components (all minigames, corruption phases, comparison slider)
+- **Steering Docs:** 3 files, ~200 lines of guidance
+- **Iterations:** Average 3-4 refinements per component with instant feedback
+- **Code Quality:** Production-ready TypeScript with proper types and cleanup
+
+### 🎓 Key Takeaway
+Kiro transformed our development workflow from "writing code" to "designing experiences." We focused on what we wanted to build, and Kiro handled the implementation details while maintaining our design system and code quality standards.
 
 ## Challenges we ran into
 1. **Balancing Game Difficulty** - Making the minigames challenging but not frustrating was tough. We iterated multiple times on timing windows and difficulty curves.

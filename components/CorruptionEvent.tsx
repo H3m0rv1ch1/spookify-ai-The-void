@@ -313,22 +313,22 @@ export const CorruptionEvent: React.FC<CorruptionEventProps> = ({ onFix }) => {
       return (
           <div className="fixed inset-0 z-[100] bg-void font-tech text-ash flex flex-col items-center justify-center p-4 overflow-hidden">
               
-              {/* Background Marquee */}
+              {/* Background Marquee - Static, no animation */}
               <div className="absolute top-1/2 -translate-y-1/2 w-full opacity-5 pointer-events-none select-none overflow-hidden">
-                 <div className="whitespace-nowrap font-display font-black text-[20vw] leading-none animate-marquee text-neon-red">
+                 <div className="whitespace-nowrap font-display font-black text-[20vw] leading-none text-neon-red">
                     ERROR 404 // SIGNAL LOST // VOID DETECTED // ERROR 404 // 
                  </div>
               </div>
               
-              {/* CRT Effects & Grid */}
-              <div className="absolute inset-0 bg-grid opacity-[0.08] pointer-events-none"></div>
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.5)_0%,transparent_50%,rgba(0,0,0,0.5)_100%)] pointer-events-none"></div>
+              {/* CRT Effects & Grid - Fade in */}
+              <div className="absolute inset-0 bg-grid opacity-[0.08] pointer-events-none animate-[fadeIn_0.5s_ease-out]"></div>
+              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.5)_0%,transparent_50%,rgba(0,0,0,0.5)_100%)] pointer-events-none animate-[fadeIn_0.5s_ease-out]"></div>
               
-              {/* Radial gradient glow */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,42,42,0.1)_0%,transparent_70%)] pointer-events-none"></div>
+              {/* Radial gradient glow - Fade in */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,42,42,0.1)_0%,transparent_70%)] pointer-events-none animate-[fadeIn_0.6s_ease-out]"></div>
               
-              {/* HUD Header */}
-              <header className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-black/30 border-b border-neon-red/20 backdrop-blur-sm z-10">
+              {/* HUD Header - Slide down */}
+              <header className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-black/30 border-b border-neon-red/20 backdrop-blur-sm z-10 animate-[slideDown_0.4s_ease-out]">
                   <div className="font-display font-bold text-lg">
                       SPOOKIFY<span className="text-neon-red">.AI</span> <span className="text-white/30 font-tech text-sm">// SYSTEM ERROR</span>
                   </div>
@@ -342,10 +342,11 @@ export const CorruptionEvent: React.FC<CorruptionEventProps> = ({ onFix }) => {
 
               <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center flex flex-col items-center gap-8">
-                      {/* 404 */}
-                      <h2 className="font-display font-extrabold text-6xl sm:text-8xl md:text-[8rem] lg:text-[10rem] text-neon-red leading-[0.9] tracking-tighter drop-shadow-[0_0_40px_rgba(255,42,42,0.6)]">404</h2>
+                      {/* 404 - Scale up with glow */}
+                      <h2 className="font-display font-extrabold text-6xl sm:text-8xl md:text-[8rem] lg:text-[10rem] text-neon-red leading-[0.9] tracking-tighter drop-shadow-[0_0_40px_rgba(255,42,42,0.6)] animate-[scaleIn_0.5s_ease-out]">404</h2>
                       
-                      <div className="max-w-3xl mx-auto mb-8 relative group text-center px-8">
+                      {/* Description - Slide up and fade in */}
+                      <div className="max-w-3xl mx-auto mb-8 relative group text-center px-8 animate-[slideUp_0.5s_ease-out_0.2s_both]">
                            {/* Decorative lines around text */}
                            <div className="absolute -left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:via-neon-red/50 transition-all duration-500 hidden md:block"></div>
                            <div className="absolute -right-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:via-neon-red/50 transition-all duration-500 hidden md:block"></div>
@@ -370,8 +371,8 @@ export const CorruptionEvent: React.FC<CorruptionEventProps> = ({ onFix }) => {
                            </div>
                         </div>
                       
-                      {/* Reboot Button */}
-                      <div className="shadow-[0_0_50px_rgba(255,42,42,0.2)]">
+                      {/* Reboot Button - Fade in and scale */}
+                      <div className="shadow-[0_0_50px_rgba(255,42,42,0.2)] animate-[scaleIn_0.4s_ease-out_0.4s_both]">
                           <SpookyButton 
                               variant="ritual" 
                               onClick={() => setPhase('CRASH')} 
